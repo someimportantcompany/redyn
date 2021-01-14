@@ -57,11 +57,21 @@ function createLogger(level = null) {
   };
 }
 
+function isDynamoDB(value) {
+  return value && value instanceof AWS.DynamoDB;
+}
+
+function isSet(value) {
+  return value && value instanceof Set;
+}
+
 module.exports = {
   assert,
   buildTTL,
   createLogger,
+  isDynamoDB,
   isPlainObject,
+  isSet,
   marshall,
   packageName,
   unmarshall,

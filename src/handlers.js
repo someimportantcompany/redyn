@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const { assert, isPlainObject, packageName } = require('./utils');
 /* eslint-disable no-invalid-this */
 
-function createMethod(name, command) {
+function createNonTransactMethod(name, command) {
   function createHandler() {
     const { client } = this;
     assert(client instanceof AWS.DynamoDB, 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
@@ -55,5 +55,5 @@ function createMethod(name, command) {
 }
 
 module.exports = {
-  createMethod,
+  createNonTransactMethod,
 };

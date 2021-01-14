@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
-const { assert, createLogger, isPlainObject, packageName } = require('./utils');
-const { commands, standalone } = require('./commands');
-const { createMethod } = require('./handlers');
+const { assert, createLogger, isDynamoDB, isPlainObject } = require('./utils');
+const { createNonTransactMethod } = require('./handlers');
+const { methods, transactables } = require('./commands');
 
 let overwriteDynamoDB = null;
 
@@ -18,12 +18,12 @@ function createClient(opts) {
   assert(typeof tableName === 'string', new TypeError('Expected { tableName } to be a string'));
 
   return Object.create({
-    ...Object.keys(commands).reduce((cs, key) => {
-      cs[`${key}`.toLowerCase()] = cs[`${key}`.toUpperCase()] = createMethod(`${key}`.toUpperCase(), commands[key]);
+    ...Object.keys(transactables).reduce((cs, key) => {
+      cs[`${key}`.toLowerCase()] = cs[`${key}`.toUpperCase()] = createNonTransactMethod(`${key}`.toUpperCase(), transactables[key]);
       return cs;
     }, {}),
-    ...Object.keys(standalone).reduce((cs, key) => {
-      cs[`${key}`.toLowerCase()] = cs[`${key}`.toUpperCase()] = standalone[key];
+    ...Object.keys(methods).reduce((cs, key) => {
+      cs[`${key}`.toLowerCase()] = cs[`${key}`.toUpperCase()] = methods[key];
       return cs;
     }, {}),
   }, {
@@ -37,10 +37,9 @@ function validateDynamoDB(client) {
   if (isPlainObject(client)) {
     return new AWS.DynamoDB({ ...client });
   } else if (client) {
-    assert(!(client instanceof AWS.DynamoDB.DocumentClient),
-      new TypeError(`Sorry, ${packageName} doesn't support AWS.DynamoDB.DocumentClient`));
-    assert(client instanceof AWS.DynamoDB,
-      new TypeError('Expected { dynamodb } to be an instance of AWS.DynamoDB'));
+    const { DynamoDB: { DocumentClient } } = AWS;
+    assert(!(client instanceof DocumentClient), new TypeError('AWS.DynamoDB.DocumentClient is not supported'));
+    assert(isDynamoDB(client), new TypeError('Expected { dynamodb } to be an instance of AWS.DynamoDB'));
     return client;
   } else {
     return null;

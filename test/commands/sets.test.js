@@ -3,7 +3,7 @@ const redyn = require('redyn');
 const { dynamodb, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
 const { v4: uuid } = require('uuid');
 
-describe('examples', () => describe('lists', () => {
+describe('examples', () => describe.skip('sets', () => {
   let client = null;
   const index = 0;
   const TableName = 'redyn-example-table';
@@ -13,8 +13,9 @@ describe('examples', () => describe('lists', () => {
     await deleteThenCreateExampleTable(dynamodb);
     client = redyn.createClient(TableName);
 
-    await writeItem(dynamodb, { Item: marshall({ key, index, value: [ 'Hello', 'world' ] }) });
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [ 'Hello', 'world' ],
+    console.log(JSON.stringify(marshall({ key, index, value: new Set([ 'Hello', 'world' ]) }), null, 2));
+    await writeItem(dynamodb, { Item: marshall({ key, index, value: new Set([ 'Hello', 'world' ]) }) });
+    assert.deepStrictEqual(await client.smembers(key), [ 'Hello', 'world' ],
       'Expected LRANGE 0 -1 to return the whole array');
   });
 

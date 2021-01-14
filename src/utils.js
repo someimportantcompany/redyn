@@ -1,9 +1,7 @@
 const AWS = require('aws-sdk');
 const isPlainObject = require('lodash.isplainobject');
 const ms = require('ms');
-
 const { name: packageName } = require('../package.json');
-const { marshall, unmarshall } = AWS.DynamoDB.Converter;
 
 const TEN_YEARS_MS = 60 * 60 * 24 * 7 * 52 * 10 * 1000;
 
@@ -63,6 +61,120 @@ function isDynamoDB(value) {
 
 function isSet(value) {
   return value && value instanceof Set;
+}
+
+function marshall(input) {
+  assert(isPlainObject(input), new TypeError('Expected input to be a plain object'));
+
+  const transform = value => {
+    if (isPlainObject(value)) {
+      return { M: marshall(value) };
+    } else if (value instanceof Set) {
+      const values = [ ...value ];
+      const getType = val => val instanceof Buffer ? 'Buffer' : typeof val;
+      const validSetTypes = [ 'string', 'number', 'Buffer' ];
+
+      const type = getType(values[0]);
+      assert(validSetTypes.includes(type), new TypeError('Expected set to be all strings, all numbers or all Buffers'));
+      values.forEach(v => assert(getType(v) === type, new TypeError(`Expected each value of the set to be a ${type}`)));
+
+      if (type === 'Buffer') {
+        return { BS: values.map(v => v.toString('base64')) };
+      } else if (type === 'number') {
+        return { NS: values.map(v => `${v}`) };
+      } else {
+        return { SS: values };
+      }
+    } else if (Array.isArray(value)) {
+      return { L: value.map(v => transform(v)) };
+    } else if (value instanceof Buffer) {
+      return { B: value.toString('base64') };
+    } else if (value === null) {
+      return { NULL: true };
+    } else {
+      const type = typeof value;
+      if (type === 'boolean') {
+        return { BOOL: value === true };
+      } else if (type === 'string') {
+        return { S: value };
+      } else if (type === 'number') {
+        return { N: `${value}` };
+      } else {
+        return {};
+      }
+    }
+  };
+
+  for (const key in input) {
+    /* istanbul ignore else */
+    if (input.hasOwnProperty(key) && input[key] !== undefined) {
+      input[key] = transform(input[key]);
+    }
+  }
+
+  return input;
+}
+
+function unmarshall(input) {
+  assert(isPlainObject(input), new TypeError('Expected input to be a marshalled value'));
+
+  const transform = value => {
+    assert(isPlainObject(value), new TypeError('Expected marshalled value to be a plain object'));
+    assert(Object.keys(value).length <= 1, new TypeError('Expected marshalled object to have a single key'));
+
+    if (value.hasOwnProperty('M')) {
+      const { M: map } = value;
+      assert(isPlainObject(map), new TypeError('Expected marshalled value to be a plain object'));
+      return unmarshall(map);
+    } else if (value.hasOwnProperty('SS') || value.hasOwnProperty('NS')) {
+      const { SS: strings, NS: numbers } = value;
+      assert(!value.hasOwnProperty('SS') || Array.isArray(strings), new TypeError('Expected SS key to be an array'));
+      assert(!value.hasOwnProperty('NS') || Array.isArray(numbers), new TypeError('Expected NS key to be an array'));
+      return new Set([].concat(strings || [], (numbers || []).map(n => `${n}`.includes('.') ? parseFloat(n) : parseInt(n, 10))));
+    } else if (value.hasOwnProperty('BS')) {
+      const { BS: buffers } = value;
+      assert(Array.isArray(buffers), new TypeError('Expected BS key to be an array'));
+      buffers.forEach(buf => assert(buf instanceof Buffer || typeof buf === 'string',
+        new TypeError('Expected every BS item to be a Buffer or string buffers')));
+      return new Set(buffers.map(buf => buf instanceof Buffer ? buf : Buffer.from(buf, 'base64')));
+    } else if (value.hasOwnProperty('L')) {
+      const { L: list } = value;
+      assert(Array.isArray(list), new TypeError('Expected L key to be an array'));
+      return list.map(v => transform(v));
+    } else if (value.hasOwnProperty('NULL')) {
+      const { NULL: nullValue } = value;
+      assert(nullValue === true, new TypeError('Expected NULL key to be true'));
+      return null;
+    } else if (value.hasOwnProperty('BOOL')) {
+      const { BOOL: boolValue } = value;
+      assert(typeof boolValue === 'boolean', new TypeError('Expected BOOL key to be a boolean value'));
+      return boolValue === true;
+    } else if (value.hasOwnProperty('S')) {
+      const { S: string } = value;
+      assert(typeof string === 'string', new TypeError('Expected S key to be a string value'));
+      return string;
+    } else if (value.hasOwnProperty('N')) {
+      const number = `${value.N}`.includes('.') ? parseFloat(value.N) : parseInt(value.N, 10);
+      assert(typeof number === 'number', new TypeError('Expected N key to be a number value'));
+      return number;
+    } else if (value.hasOwnProperty('B')) {
+      const { B: buf } = value;
+      assert(buf instanceof Buffer || typeof buf === 'string',
+        new TypeError('Expected B key to be a Buffer or string value'));
+      return buf instanceof Buffer ? buf : Buffer.from(buf, 'base64');
+    } else {
+      return undefined;
+    }
+  };
+
+  for (const key in input) {
+    /* istanbul ignore else */
+    if (input.hasOwnProperty(key) && input[key] !== undefined) {
+      input[key] = transform(input[key]);
+    }
+  }
+
+  return input;
 }
 
 module.exports = {

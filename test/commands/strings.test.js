@@ -1,10 +1,7 @@
 const assert = require('assert');
-const AWS = require('aws-sdk');
 const redyn = require('redyn');
-const { dynamodb, deleteThenCreateExampleTable, writeItem } = require('../utils');
+const { dynamodb, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
 const { v4: uuid } = require('uuid');
-
-const { marshall } = AWS.DynamoDB.Converter;
 
 describe('examples', () => describe('strings', () => {
   let client = null;
@@ -21,11 +18,12 @@ describe('examples', () => describe('strings', () => {
   });
 
   it('should set strings', async () => {
-    const setOk = await client.set('example-string', 'example-value');
+    const key = uuid();
+
+    const setOk = await client.set(key, 'example-value');
     assert(setOk === true, 'Expected SET to return true');
 
-    const setValue = await client.get('example-string');
-    assert(setValue === 'example-value', 'Expected SET to result in "example-value"');
+    assert(await client.get(key) === 'example-value', 'Expected SET to result in "example-value"');
   });
 
   it('should set numbers', async () => {

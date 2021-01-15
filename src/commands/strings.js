@@ -1,4 +1,4 @@
-const { assert, buildTTL, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
+const { assert, buildTTL, formatKeyValueObject, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
 const index = 0;
 
@@ -39,7 +39,7 @@ const transactables = {
     assert(!opts.px, new Error('Millisecond expiry is not supported by DynamoDB'));
     assert(!(opts.expiresIn && opts.ex), new TypeError('expiresIn & ex are exclusive'));
 
-    const ttl = buildTTL(opts.expiresIn) || buildTTL(opts.ex) || null;
+    const ttl = buildTTL(opts.expiresIn) || buildTTL(opts.ex) || undefined;
 
     await handler({
       Put: {
@@ -105,7 +105,7 @@ const methods = {
 
   async mget(...items) {
     const { client, tableName } = this;
-    assert(isDynamoDB(client), 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
+    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(Array.isArray(items), new TypeError('Expected keys to be an array'));
     assert(items.length <= 25, new TypeError('Expected keys to be less-than-or-equal-to 25 keys'));
@@ -139,26 +139,11 @@ const methods = {
 
   async mset(...items) {
     const { client, tableName } = this;
-    assert(isDynamoDB(client), 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
+    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(Array.isArray(items), new TypeError('Expected keys to be an array'));
 
-    if (Array.isArray(items) && items.length === 1 && isPlainObject(items[0])) {
-      items = Object.keys(items[0]).map(key => ({ key, value: items[0][key] }));
-    } else {
-      assert(Array.isArray(items), new TypeError('Expected keys to be an array'));
-      assert(items.length % 2 === 0, new TypeError('Expected every key to have a value'));
-
-      items = items.reduce((r, v, i) => {
-        if (i % 2 === 0) {
-          r.push({ key: v });
-        } else {
-          r[r.length - 1].value = v;
-        }
-        return r;
-      }, []);
-    }
-
+    items = formatKeyValueObject(items);
     assert(items.length <= 25, new TypeError('Expected keys to be less-than-or-equal-to 25 keys'));
 
     if (items.length) {

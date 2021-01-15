@@ -32,12 +32,13 @@ function createNonTransactMethod(name, command) {
         // console.log(JSON.stringify({ deleteItem: result }, null, 2));
       } else {
         const [ key ] = Object.keys(body);
-        assert(false, new Error(`Unknown key ${key} for handler`));
+        assert(false, new TypeError(`Unknown key ${key} for non-transact handler`));
       }
 
       return result;
     };
 
+    handler.command = name;
     handler.transactional = false;
 
     return handler;

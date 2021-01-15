@@ -1,114 +1,348 @@
 const assert = require('assert');
 const redyn = require('redyn');
-const { dynamodb, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
+const { dynamodb, assertItem, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
 const { v4: uuid } = require('uuid');
 
-describe('examples', () => describe.skip('sets', () => {
+describe('commands', () => describe('sets', () => {
   let client = null;
   const index = 0;
   const TableName = 'redyn-example-table';
 
   before(async () => {
-    const key = uuid();
     await deleteThenCreateExampleTable(dynamodb);
     client = redyn.createClient(TableName);
-
-    console.log(JSON.stringify(marshall({ key, index, value: new Set([ 'Hello', 'world' ]) }), null, 2));
-    await writeItem(dynamodb, { Item: marshall({ key, index, value: new Set([ 'Hello', 'world' ]) }) });
-    assert.deepStrictEqual(await client.smembers(key), [ 'Hello', 'world' ],
-      'Expected LRANGE 0 -1 to return the whole array');
   });
 
-  it('should rpush onto a list', async () => {
+  it('should use sadd to add to a set', async () => {
     const key = uuid();
 
-    const rpushOk1 = await client.rpush(key, 'value');
-    assert(rpushOk1 === true, 'Expected RPUSH to return true');
+    const saddOk1 = await client.sadd(key, 'value');
+    assert(saddOk1 === true, 'Expected SADD to return true');
+    const saddOk2 = await client.sadd(key, 'value');
+    assert(saddOk2 === true, 'Expected SADD to return true');
+    const saddOk3 = await client.sadd(key, 'value2');
+    assert(saddOk3 === true, 'Expected SADD to return true');
 
-    const rpushOk2 = await client.rpush(key, 'value2', 'value3');
-    assert(rpushOk2 === true, 'Expected RPUSH to return true');
-
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [ 'value', 'value2', 'value3' ],
-      'Expected LRANGE 0 -1 to return the whole array');
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value', 'value2' ] },
+    });
   });
 
-  it('should lpush onto a list', async () => {
+  it('should use smembers to read from a set', async () => {
     const key = uuid();
 
-    const lpushOk1 = await client.lpush(key, 'value');
-    assert(lpushOk1 === true, 'Expected LPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
 
-    const lpushOk2 = await client.lpush(key, 'value2', 'value3');
-    assert(lpushOk2 === true, 'Expected LPUSH to return true');
-
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [ 'value3', 'value2', 'value' ],
-      'Expected LRANGE 0 -1 to return the whole array');
+    const values = await client.smembers(key);
+    assert.deepStrictEqual(values, [ 'value', 'value2', 'value3' ], 'Expected SMEMBERS to return the whole set');
   });
 
-  it('should lrange the start of a list', async () => {
+  it('should use scard to count the items in a set', async () => {
     const key = uuid();
 
-    const rpushOk = await client.rpush(key, 'value', 'value2', 'value3', 'value4', 'value5');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
 
-    const lrangeValue = await client.lrange(key, 0, 2);
-    assert.deepStrictEqual(lrangeValue, [ 'value', 'value2', 'value3' ], 'Expected LRANGE to return an array');
+    const size = await client.scard(key);
+    assert.strictEqual(size, 3, 'Expected SCARD to count the whole set');
   });
 
-  it('should lrange the end of a list', async () => {
+  it('should use sdiff to diff two sets', async () => {
     const key = uuid();
+    const key2 = uuid();
 
-    const rpushOk = await client.rpush(key, 'value', 'value2', 'value3', 'value4', 'value5');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value2', 'value3', 'value4' ] },
+      },
+    });
 
-    const lrangeValue = await client.lrange(key, -2, -1);
-    assert.deepStrictEqual(lrangeValue, [ 'value4', 'value5' ], 'Expected LRANGE to return an array');
+    const diff = await client.sdiff(key, key2);
+    assert.deepStrictEqual(diff, [ 'value' ]);
   });
 
-  it('should rpushx a list', async () => {
+  it('should use sdiffstore to diff two sets & store the result', async () => {
     const key = uuid();
+    const key2 = uuid();
+    const key3 = uuid();
 
-    const rpushOk = await client.rpush(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key3 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value2', 'value3', 'value4' ] },
+      },
+    });
 
-    const rpushxOk = await client.rpushx(key, 'value1');
-    assert(rpushxOk === true, 'Expected RPUSHX to return true');
+    const size = await client.sdiffstore(key, key2, key3);
+    assert.deepStrictEqual(size, 1, 'Expected SDIFFSTORE to return 1');
 
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [ 'value', 'value1' ],
-      'Expected LRANGE to return an array');
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value' ] },
+    });
   });
 
-  it('should lpushx a list', async () => {
+  it('should use sismember to check if a member is in a set', async () => {
     const key = uuid();
 
-    const rpushOk = await client.rpush(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
 
-    const lpushxOk = await client.lpushx(key, 'value1');
-    assert(lpushxOk === true, 'Expected LPUSHX to return true');
-
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [ 'value1', 'value' ],
-      'Expected LRANGE to return an array');
+    const isIn = await client.sismember(key, 'value');
+    assert.strictEqual(isIn, true, 'Expected SISMEMBER to return true');
   });
 
-  it('should fail to rpushx a list silently', async () => {
+  it('should use sinter to diff two sets', async () => {
     const key = uuid();
+    const key2 = uuid();
 
-    const rpushOk = await client.rpushx(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value3', 'value5' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value4' ] },
+      },
+    });
 
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [],
-      'Expected LRANGE to return an array');
+    const inter = await client.sinter(key, key2);
+    assert.deepStrictEqual(inter, [ 'value' ]);
   });
 
-  it('should fail to lpushx a list silently', async () => {
+  it('should use sinterstore to diff two sets & store the result', async () => {
+    const key = uuid();
+    const key2 = uuid();
+    const key3 = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value3', 'value5' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key3 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value4' ] },
+      },
+    });
+
+    const size = await client.sinterstore(key, key2, key3);
+    assert.deepStrictEqual(size, 1, 'Expected SINTERSTORE to return 1');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value' ] },
+    });
+  });
+
+  it('should use smismember to check if a member is in a set', async () => {
     const key = uuid();
 
-    const rpushOk = await client.lpushx(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
 
-    assert.deepStrictEqual(await client.lrange(key, 0, -1), [],
-      'Expected LRANGE to return an array');
+    const isIn = await client.smismember(key, 'value', 'value2', 'value4');
+    assert.deepStrictEqual(isIn, [ true, true, false ], 'Expected SMISMEMBER to return an array');
+  });
+
+  it('should use smove to move a member between sets', async () => {
+    const key = uuid();
+    const key2 = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value2', 'value3', 'value4' ] },
+      },
+    });
+
+    const moved = await client.smove(key, key2, 'value');
+    assert.strictEqual(moved, true, 'Expected SMOVE to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value2', 'value3' ] },
+    });
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2, index }) }, {
+      key: { S: key2 },
+      index: { N: `${index}` },
+      value: { SS: [ 'value', 'value2', 'value3', 'value4' ] },
+    });
+  });
+
+  it('should use srem to remove a member from a set', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
+
+    const removed = await client.srem(key, 'value');
+    assert.strictEqual(removed, true, 'Expected SREM to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value2', 'value3' ] },
+    });
+  });
+
+  it('should use srem to remove members from a set', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value3' ] },
+      },
+    });
+
+    const removed = await client.srem(key, 'value', 'value2', 'value4');
+    assert.strictEqual(removed, true, 'Expected SREM to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value3' ] },
+    });
+  });
+
+  it('should use sunion to diff two sets', async () => {
+    const key = uuid();
+    const key2 = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value3' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2' ] },
+      },
+    });
+
+    const union = await client.sunion(key, key2);
+    assert.deepStrictEqual(union, [ 'value', 'value3', 'value2' ]);
+  });
+
+  it('should use sunionstore to diff two sets & store the result', async () => {
+    const key = uuid();
+    const key2 = uuid();
+    const key3 = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value3', 'value5' ] },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key3 },
+        index: { N: `${index}` },
+        value: { SS: [ 'value', 'value2', 'value4' ] },
+      },
+    });
+
+    const size = await client.sunionstore(key, key2, key3);
+    assert.deepStrictEqual(size, 5, 'Expected SUNIONSTORE to return 1');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { SS: [ 'value', 'value2', 'value3', 'value4', 'value5' ] },
+    });
   });
 
 }));

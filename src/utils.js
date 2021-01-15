@@ -55,6 +55,27 @@ function createLogger(level = null) {
   };
 }
 
+function formatKeyValueObject(pairs) {
+  assert(Array.isArray(pairs), new TypeError('Expected pairs to be an array'));
+
+  if (Array.isArray(pairs) && pairs.length === 1 && isPlainObject(pairs[0])) {
+    return Object.keys(pairs[0]).map(key => ({ key, value: pairs[0][key] }));
+  } else {
+    assert(pairs.length % 2 === 0, new TypeError('Expected every pair to have a key & value'));
+
+    pairs = pairs.reduce((r, v, i) => {
+      if (i % 2 === 0) {
+        r.push({ key: v });
+      } else {
+        r[r.length - 1].value = v;
+      }
+      return r;
+    }, []);
+
+    return pairs;
+  }
+}
+
 function isDynamoDB(value) {
   return value && value instanceof AWS.DynamoDB;
 }
@@ -181,6 +202,7 @@ module.exports = {
   assert,
   buildTTL,
   createLogger,
+  formatKeyValueObject,
   isDynamoDB,
   isPlainObject,
   isSet,

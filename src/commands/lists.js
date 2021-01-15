@@ -136,7 +136,7 @@ const methods = {
 
   async lrange(key, start, stop) {
     const { client, tableName } = this;
-    assert(isDynamoDB(client), 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
+    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
     assert(typeof start === 'number', new TypeError('Expected start to be a number'));
@@ -164,7 +164,7 @@ const methods = {
 
   async lindex(key, i) {
     const { client, tableName } = this;
-    assert(isDynamoDB(client), 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
+    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
     assert(typeof i === 'number', new TypeError('Expected index to be a number'));
@@ -186,7 +186,7 @@ const methods = {
 
   async llen(key) {
     const { client, tableName } = this;
-    assert(isDynamoDB(client), 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
+    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
     assert(typeof index === 'number', new TypeError('Expected index to be a number'));

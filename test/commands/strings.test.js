@@ -1,84 +1,261 @@
 const assert = require('assert');
 const redyn = require('redyn');
-const { dynamodb, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
+const { dynamodb, assertItem, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
 const { v4: uuid } = require('uuid');
 
-describe('examples', () => describe('strings', () => {
+describe('commands', () => describe('strings', () => {
   let client = null;
   const index = 0;
   const TableName = 'redyn-example-table';
 
   before(async () => {
-    const key = uuid();
     await deleteThenCreateExampleTable(dynamodb);
     client = redyn.createClient(TableName);
+  });
 
-    await writeItem(dynamodb, { Item: marshall({ key, index, value: 'Hello, world!' }) });
-    assert(await client.get(key) === 'Hello, world!', 'Expected GET to return the string');
+  it('should get strings', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { S: 'example-value' },
+      },
+    });
+
+    const result = await client.get(key);
+    assert.strictEqual(result, 'example-value', 'Expected GET to return the string value');
   });
 
   it('should set strings', async () => {
     const key = uuid();
 
-    const setOk = await client.set(key, 'example-value');
-    assert(setOk === true, 'Expected SET to return true');
+    const result = await client.set(key, 'example-value');
+    assert(result === true, 'Expected SET to return true');
 
-    assert(await client.get(key) === 'example-value', 'Expected SET to result in "example-value"');
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { S: 'example-value' },
+    });
+  });
+
+  it('should get numbers', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { N: '1.23' },
+      },
+    });
+
+    const result = await client.get(key);
+    assert.strictEqual(result, 1.23, 'Expected GET to return the number value');
   });
 
   it('should set numbers', async () => {
-    const setOk = await client.set('example-number', 1);
-    assert(setOk === true, 'Expected SET to return true');
+    const key = uuid();
 
-    const setValue = await client.get('example-number');
-    assert(setValue === 1, 'Expected SET to result in 1');
-  });
+    const result = await client.set(key, 1);
+    assert(result === true, 'Expected SET to return true');
 
-  it('should incr/decr numbers', async () => {
-    const setOk = await client.set('example-number', 1);
-    assert(setOk === true, 'Expected SET to return true');
-
-    const setValue = await client.get('example-number');
-    assert(setValue === 1, 'Expected SET to result in 1');
-
-    const incrOk = await client.incr('example-number');
-    assert(incrOk === true, 'Expected INCR to return true');
-
-    const incrValue = await client.get('example-number');
-    assert(incrValue === 2, 'Expected INCR to result in 2');
-
-    const incrByOk = await client.incrby('example-number', 3);
-    assert(incrByOk === true, 'Expected INCRBY to return true');
-
-    const incrValue2 = await client.get('example-number');
-    assert(incrValue2 === 5, 'Expected INCRBY to result in 5');
-  });
-
-  it('should mget/mset strings', async () => {
-    const setOneOk = await client.mset('example-string', 'example-value');
-    assert(setOneOk === true, 'Expected MSET to return true');
-
-    const setOneValue = await client.mget('example-string');
-    assert.deepStrictEqual(setOneValue, [ 'example-value' ], 'Expected MSET to result in ["example-value"]');
-
-    const setTwoOk = await client.mset('example-string-1', 'example-value-1', 'example-string-2', 'example-value-2');
-    assert(setTwoOk === true, 'Expected MSET to return true');
-
-    const setTwoValue = await client.mget('example-string', 'example-string-1', 'example-string-2');
-    assert.deepStrictEqual(setTwoValue, [ 'example-value', 'example-value-1', 'example-value-2' ],
-      'Expected MSET to result in ["example-value","example-value-1","example-value-2"]');
-
-    const setManyOk = await client.mset({
-      'example-string': 'example-value',
-      'example-string-42': 'example-value-42',
-      'example-string-256': 'example-value-256',
-      'example-string-1024': 'example-value-1024',
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { N: '1' },
     });
-    assert(setManyOk === true, 'Expected MSET to return true');
+  });
 
-    const setManyValue = await client.mget('example-string', 'example-string-42', 'example-string-256', 'example-string-1024');
-    assert.deepStrictEqual(setManyValue, [ 'example-value', 'example-value-42', 'example-value-256', 'example-value-1024' ],
-      'Expected MSET to result in ["example-value","example-value-42","example-value-256","example-string-1024"]');
+  it('should incr numbers', async () => {
+    const key = uuid();
+
+    const result = await client.incr(key);
+    assert(result === true, 'Expected INCR to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { N: '1' },
+    });
+  });
+
+  it('should incrby numbers', async () => {
+    const key = uuid();
+
+    const result = await client.incrby(key, 5);
+    assert(result === true, 'Expected INCRBY to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { N: '5' },
+    });
+  });
+
+  it('should decr numbers', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { N: '5' },
+      },
+    });
+
+    const result = await client.decr(key);
+    assert(result === true, 'Expected DECR to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { N: '4' },
+    });
+  });
+
+  it('should decrby numbers', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { N: '10' },
+      },
+    });
+
+    const result = await client.decrby(key, 5);
+    assert(result === true, 'Expected DECRBY to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { N: '5' },
+    });
+  });
+
+  it('should mget a string', async () => {
+    const key = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { S: 'example-value' },
+      },
+    });
+
+    const result = await client.mget(key);
+    assert.deepStrictEqual(result, [ 'example-value' ]);
+  });
+
+  it('should mget some strings', async () => {
+    const key = uuid();
+    const key2 = uuid();
+    const key3 = uuid();
+
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key },
+        index: { N: `${index}` },
+        value: { S: 'example-value' },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key2 },
+        index: { N: `${index}` },
+        value: { S: 'example-value2' },
+      },
+    });
+    await writeItem(dynamodb, {
+      TableName,
+      Item: {
+        key: { S: key3 },
+        index: { N: `${index}` },
+        value: { S: 'example-value3' },
+      },
+    });
+
+    const result = await client.mget(key, key2, key3);
+    assert.deepStrictEqual(result, [ 'example-value', 'example-value2', 'example-value3' ]);
+  });
+
+  it('should mset a string', async () => {
+    const key = uuid();
+
+    const result = await client.mset(key, 'example-value');
+    assert.deepStrictEqual(result, true, 'Expected MSET to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { S: 'example-value' },
+    });
+  });
+
+  it('should mset some strings', async () => {
+    const key = uuid();
+    const key2 = uuid();
+    const key3 = uuid();
+
+    const result = await client.mset(key, 'example-value', key2, 'example-value2', key3, 'example-value3');
+    assert.deepStrictEqual(result, true, 'Expected MSET to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { S: 'example-value' },
+    });
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2, index }) }, {
+      key: { S: key2 },
+      index: { N: `${index}` },
+      value: { S: 'example-value2' },
+    });
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key3, index }) }, {
+      key: { S: key3 },
+      index: { N: `${index}` },
+      value: { S: 'example-value3' },
+    });
+  });
+
+  it('should mset an object', async () => {
+    const key = uuid();
+    const key2 = uuid();
+    const key3 = uuid();
+
+    const result = await client.mset({
+      [key]: 'example-value',
+      [key2]: 'example-value2',
+      [key3]: 'example-value3',
+    });
+    assert.deepStrictEqual(result, true, 'Expected MSET to return true');
+
+    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+      key: { S: key },
+      index: { N: `${index}` },
+      value: { S: 'example-value' },
+    });
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2, index }) }, {
+      key: { S: key2 },
+      index: { N: `${index}` },
+      value: { S: 'example-value2' },
+    });
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key3, index }) }, {
+      key: { S: key3 },
+      index: { N: `${index}` },
+      value: { S: 'example-value3' },
+    });
   });
 
   it('should strlen strings', async () => {

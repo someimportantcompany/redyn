@@ -16,15 +16,6 @@ async function assertItem(dynamodb, getItemOpts, expected) {
   assert.deepStrictEqual(actual, expected, 'Expected item in DynamoDB to deepStrictEqual');
 }
 
-async function writeItem(dynamodb, putItemOpts) {
-  assert(dynamodb instanceof AWS.DynamoDB, 'Expected assertItem dynamodb to be an instance of AWS.DynamoDB');
-  assert(_isPlainObject(putItemOpts), 'Expected assertItem putItemOpts to be a plain object');
-
-  putItemOpts.TableName = typeof putItemOpts.TableName === 'string' ? putItemOpts.TableName : 'redyn-example-table';
-
-  await dynamodb.putItem(putItemOpts).promise();
-}
-
 async function deleteThenCreateTable(dynamodb, opts) {
   assert(dynamodb instanceof AWS.DynamoDB, 'Expected deleteThenCreateTable dynamodb to be an instance of AWS.DynamoDB');
   assert(_isPlainObject(opts), 'Expected deleteThenCreateTable opts to be a plain object');
@@ -59,6 +50,16 @@ async function deleteThenCreateTable(dynamodb, opts) {
       throw err;
     }
   }
+}
+
+async function writeItem(dynamodb, putItemOpts) {
+  assert(dynamodb instanceof AWS.DynamoDB, 'Expected writeItem dynamodb to be an instance of AWS.DynamoDB');
+  assert(_isPlainObject(putItemOpts), 'Expected writeItem putItemOpts to be a plain object');
+
+  putItemOpts.TableName = typeof putItemOpts.TableName === 'string' ? putItemOpts.TableName : 'redyn-example-table';
+  assert(_isPlainObject(putItemOpts.Item), 'Expected writeItem putItemOpts.Item to be a plain object');
+
+  await dynamodb.putItem(putItemOpts).promise();
 }
 
 module.exports = {

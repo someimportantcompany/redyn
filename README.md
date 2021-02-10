@@ -56,7 +56,7 @@ npm install --save redyn
 - [Using lists](#using-lists)
 - [Using hashmaps](#using-hashmaps)
 - [Using sets](#using-sets)
-- [Using zsets](#using-zsets)
+<!-- - [Using zsets](#using-zsets) -->
 - [Other methods](#other-methods)
 - [Transactions](#transaction)
 
@@ -135,7 +135,7 @@ const entries = redyn.createModel('redyn-example-cache');
 
 ### Using sets
 
-### Using zsets
+<!-- ### Using zsets -->
 
 ### Other methods
 

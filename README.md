@@ -69,14 +69,14 @@ const redyn = require('redyn');
 import redyn from 'redyn';
 ```
 
-#### Configure
+**Configure**
 
 | Exported | Description |
 | ---- | ---- |
 | `redyn.createClient(config)` | The main function used to create a client. |
 | `redyn.setDynamoDB(client)` | A function to set the DynamoDB instance used in future `createClient` calls, see [Set DynamoDB](#set-dynamodb) below. |
 
-#### Create a client
+**Create a client**
 
 The `createClient` method is the starting point for all clients: It is a synchronous method that builds a client from the provided configuration object that defines which table will be used:
 
@@ -87,7 +87,7 @@ const client = redyn.createClient('redyn-example-cache');
 
 You must ensure your table has already been created following this [`createTable`](./createTable.json) specification.
 
-#### Set DynamoDB
+**Set DynamoDB**
 
 _redyn_ interacts with the AWS-SDK, by default it creates a new `AWS.DynamoDB` instance when you create a model. Check out AWS's "[Setting credentials in Node.js](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html)" documentation for more details. Since underneath DynamoDB is a handful of HTTPS calls, you can theoretically create as many instances as you like.
 
@@ -126,7 +126,7 @@ const client = redyn.createClient('redyn-example-cache');
 
 ### Using strings
 
-#### `client.get(key[, opts])`
+**`client.get(key[, opts])`**
 
 Get the value of key. If the key does not exist then `null` is returned. An error is returned if the value stored at key is not a string, because `GET` only handles string values.
 
@@ -137,7 +137,7 @@ Get the value of key. If the key does not exist then `null` is returned. An erro
 
 This method supports `READ` transactions.
 
-#### `client.set(key, value[, opts])`
+**`client.set(key, value[, opts])`**
 
 Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type. Any previous time to live associated with the key is discarded on successful `SET` operation.
 
@@ -154,7 +154,7 @@ Set key to hold the string value. If key already holds a value, it is overwritte
 
 This method supports `WRITE` transactions.
 
-#### `client.incr(key)`
+**`client.incr(key)`**
 
 Increments the number stored at `key` by one. If the key does not exist, it is set to `0` before performing the operation.
 
@@ -164,7 +164,7 @@ Increments the number stored at `key` by one. If the key does not exist, it is s
 
 This method supports `WRITE` transactions.
 
-#### `client.decr(key)`
+**`client.decr(key)`**
 
 Decrements the number stored at `key` by one. If the key does not exist, it is set to `0` before performing the operation.
 
@@ -174,7 +174,7 @@ Decrements the number stored at `key` by one. If the key does not exist, it is s
 
 This method supports `WRITE` transactions.
 
-#### `client.incrby(key, increment)`
+**`client.incrby(key, increment)`**
 
 Increments the number stored at `key` by `increment`. If the key does not exist, it is set to `0` before performing the operation.
 
@@ -185,7 +185,7 @@ Increments the number stored at `key` by `increment`. If the key does not exist,
 
 This method supports `WRITE` transactions.
 
-#### `client.decrby(key, decrement)`
+**`client.decrby(key, decrement)`**
 
 Decrements the number stored at `key` by `decrement`. If the key does not exist, it is set to `0` before performing the operation.
 
@@ -196,7 +196,7 @@ Decrements the number stored at `key` by `decrement`. If the key does not exist,
 
 This method supports `WRITE` transactions.
 
-#### `client.mget(key[, key ...])`
+**`client.mget(key[, key ...])`**
 
 Returns the values of all specified keys. For every key that does not hold a string value or does not exist, `null` is returned. Because of this, the operation never fails.
 
@@ -204,7 +204,7 @@ Returns the values of all specified keys. For every key that does not hold a str
 | ---- | ---- | ---- |
 | `key` | String | **Required** Each argument is a string representing the specific key |
 
-#### `client.mset(key, value[, key, value ... ...])`
+**`client.mset(key, value[, key, value ... ...])`**
 
 Sets the given keys to their respective values. `MSET` replaces existing values with new values, just as regular `SET`.
 
@@ -213,7 +213,7 @@ Sets the given keys to their respective values. `MSET` replaces existing values 
 | `key` | String | **Required** Each key argument is a string |
 | `value` | String | **Required** Each value argument is a string |
 
-#### `client.strlen(key)`
+**`client.strlen(key)`**
 
 Returns the length of the string value stored at `key`, or `0` when `key` does not exist. An error is returned when key holds a non-string value.
 
@@ -223,7 +223,7 @@ Returns the length of the string value stored at `key`, or `0` when `key` does n
 
 ### Using lists
 
-#### `client.rpush(key, element[, element ...])`
+**`client.rpush(key, element[, element ...])`**
 
 Insert all the specified values at the tail of the list stored at `key`. If `key` does not exist, it is created as empty list before performing the push operation. When `key` holds a value that is not a list, an error is returned.
 
@@ -234,7 +234,7 @@ Insert all the specified values at the tail of the list stored at `key`. If `key
 
 This method supports `WRITE` transactions.
 
-#### `client.lpush(key, element[, element ...])`
+**`client.lpush(key, element[, element ...])`**
 
 Insert all the specified values at the head of the list stored at `key`. If `key` does not exist, it is created as empty list before performing the push operation. When `key` holds a value that is not a list, an error is returned.
 
@@ -245,7 +245,7 @@ Insert all the specified values at the head of the list stored at `key`. If `key
 
 This method supports `WRITE` transactions.
 
-#### `client.rpushx(key, element[, element ...])`
+**`client.rpushx(key, element[, element ...])`**
 
 Insert all the specified values at the tail of the list stored at `key`, only if `key` already exists & holds a list.
 
@@ -256,7 +256,7 @@ Insert all the specified values at the tail of the list stored at `key`, only if
 
 This method supports `WRITE` transactions.
 
-#### `client.lpushx(key, element[, element ...])`
+**`client.lpushx(key, element[, element ...])`**
 
 Insert all the specified values at the head of the list stored at `key`, only if `key` already exists & holds a list.
 
@@ -267,7 +267,7 @@ Insert all the specified values at the head of the list stored at `key`, only if
 
 This method supports `WRITE` transactions.
 
-#### `client.lset(key, index, element)`
+**`client.lset(key, index, element)`**
 
 Sets the list element at `index` to `element`.
 
@@ -279,7 +279,7 @@ Sets the list element at `index` to `element`.
 
 This method supports `WRITE` transactions.
 
-#### `client.lrange(key, start, stop)`
+**`client.lrange(key, start, stop)`**
 
 Returns the specified elements of the list stored at `key`. The offsets `start` and `stop` are zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being the next element and so on.
 
@@ -289,7 +289,7 @@ Returns the specified elements of the list stored at `key`. The offsets `start` 
 | `start` | Number | **Required** |
 | `stop` | Number | **Required** |
 
-#### `client.lindex(key, index)`
+**`client.lindex(key, index)`**
 
 Returns the element at index index in the list stored at key. The index is zero-based, so 0 means the first element, 1 the second element and so on.
 
@@ -298,7 +298,7 @@ Returns the element at index index in the list stored at key. The index is zero-
 | `key` | String | **Required** |
 | `index` | Number | **Required** |
 
-#### `client.llen(key, index)`
+**`client.llen(key, index)`**
 
 Returns the length of the list stored at key. If key does not exist, it is interpreted as an empty list and 0 is returned. An error is returned when the value stored at key is not a list.
 
@@ -308,7 +308,7 @@ Returns the length of the list stored at key. If key does not exist, it is inter
 
 ### Using hashmaps
 
-#### `client.hget(key, field)`
+**`client.hget(key, field)`**
 
 Returns the value associated with `field` in the hash stored at `key`.
 
@@ -319,7 +319,7 @@ Returns the value associated with `field` in the hash stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.hgetall(key)`
+**`client.hgetall(key)`**
 
 Returns all fields and values of the hash stored at `key`.
 
@@ -329,7 +329,7 @@ Returns all fields and values of the hash stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.hincrby(key, field, increment)`
+**`client.hincrby(key, field, increment)`**
 
 Increments the number stored at `field` in the hash stored at `key` by `increment`. If `key` does not exist, a new key holding a hash is created. If `field` does not exist the value is set to `0` before the operation is performed.
 
@@ -341,7 +341,7 @@ Increments the number stored at `field` in the hash stored at `key` by `incremen
 
 This method supports `WRITE` transactions.
 
-#### `client.hkeys(key)`
+**`client.hkeys(key)`**
 
 Returns all field names in the hash stored at `key`.
 
@@ -351,7 +351,7 @@ Returns all field names in the hash stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.hlen(key)`
+**`client.hlen(key)`**
 
 Returns the number of fields contained in the hash stored at `key`.
 
@@ -361,7 +361,7 @@ Returns the number of fields contained in the hash stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.hmget(key, field[, field ...])`
+**`client.hmget(key, field[, field ...])`**
 
 Returns the values associated with the specified `fields` in the hash stored at `key`.
 
@@ -374,7 +374,7 @@ For every `field` that does not exist in the hash, a `null` value is returned. B
 
 This method supports `READ` transactions.
 
-#### `client.hstrlen(key, field)`
+**`client.hstrlen(key, field)`**
 
 Returns the string length of the value associated with `field` in the hash stored at `key`. If the `key` or the `field` do not exist, `0` is returned.
 
@@ -385,7 +385,7 @@ Returns the string length of the value associated with `field` in the hash store
 
 This method supports `READ` transactions.
 
-#### `client.hvals(key)`
+**`client.hvals(key)`**
 
 Returns all field values in the hash stored at `key`.
 
@@ -395,7 +395,7 @@ Returns all field values in the hash stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.hset(key, field, value[, field, value, ... ...])`
+**`client.hset(key, field, value[, field, value, ... ...])`**
 
 Sets `field` in the hash stored at `key` to `value`. If `key` does not exist, a new `key` holding a hash is created. If `field` already exists in the hash, it is overwritten.
 
@@ -405,7 +405,7 @@ Sets `field` in the hash stored at `key` to `value`. If `key` does not exist, a 
 | `field` | String | **Required**, each field should be a string |
 | `value` | String | **Required**, each value should be a string |
 
-#### `client.hset(key, object)`
+**`client.hset(key, object)`**
 
 Sets each `key` `value` pair in the object into the hash stored at `key`. If `key` does not exist, a new `key` holding a hash is created. If `field` already exists in the hash, it is overwritten.
 
@@ -418,7 +418,7 @@ Sets each `key` `value` pair in the object into the hash stored at `key`. If `ke
 
 - Set members can be Strings / Numbers / Buffers, but you cannot mix types.
 
-#### `client.sadd(key, member[, member ...])`
+**`client.sadd(key, member[, member ...])`**
 
 Add the specified members to the set stored at `key`. Specified members that are already a member of this set are ignored. If `key` does not exist, a new set is created before adding the specified members.
 
@@ -429,7 +429,7 @@ Add the specified members to the set stored at `key`. Specified members that are
 
 This method supports `WRITE` transactions.
 
-#### `client.scard(key)`
+**`client.scard(key)`**
 
 Returns the set cardinality (number of elements) of the set stored at `key`.
 
@@ -439,7 +439,7 @@ Returns the set cardinality (number of elements) of the set stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.sismember(key, member)`
+**`client.sismember(key, member)`**
 
 Returns `true` if `member` is a member of the set stored at `key`.
 
@@ -450,7 +450,7 @@ Returns `true` if `member` is a member of the set stored at `key`.
 
 This method supports `READ` transactions.
 
-#### `client.smismember(key, member[, member ...])`
+**`client.smismember(key, member[, member ...])`**
 
 Returns whether each `member` is a member of the set stored at `key`. For every member, `true` is returned if the value is a member of the set, or `false` if the element is not a member of the set or if `key` does not exist.
 
@@ -461,7 +461,7 @@ Returns whether each `member` is a member of the set stored at `key`. For every 
 
 This method supports `READ` transactions.
 
-#### `client.srem(key, member[, member ...])`
+**`client.srem(key, member[, member ...])`**
 
 Remove the specified members from the set stored at `key`. Specified members that are not a member of this set are ignored.
 

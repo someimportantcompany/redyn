@@ -141,10 +141,10 @@ describe('commands', () => describe('hashes', () => {
     assert.deepStrictEqual(result, [ 'value', 'value2' ], 'Expected HMGET to return the value');
   });
 
-  it('should hmset an object as a new hashmap', async () => {
+  it('should hset an object as a new hashmap', async () => {
     const key = uuid();
 
-    const result = await client.hmset(key, { field: 'value' });
+    const result = await client.hset(key, { field: 'value' });
     assert(result === true, 'Expected HMSET to return true');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {

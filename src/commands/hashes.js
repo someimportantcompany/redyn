@@ -227,12 +227,6 @@ const methods = {
     return true;
   },
 
-  hmset(key, items) {
-    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
-    assert(isPlainObject(items), new TypeError('Expected items to be a plain object'));
-    return methods.hset.call(this, key, items);
-  },
-
 };
 
 module.exports = { methods, transactables };

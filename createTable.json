@@ -2,12 +2,10 @@
   "TableName": "redyn-example-table",
   "BillingMode": "PAY_PER_REQUEST",
   "KeySchema": [
-    { "AttributeName": "key", "KeyType": "HASH" },
-    { "AttributeName": "index", "KeyType": "RANGE" }
+    { "AttributeName": "key", "KeyType": "HASH" }
   ],
   "AttributeDefinitions": [
-    { "AttributeName": "key", "AttributeType": "S" },
-    { "AttributeName": "index", "AttributeType": "N" }
+    { "AttributeName": "key", "AttributeType": "S" }
   ],
   "TimeToLiveSpecification": {
     "AttributeName": "ttl",

@@ -5,7 +5,6 @@ const { v4: uuid } = require('uuid');
 
 describe('commands', () => describe('lists', () => {
   let client = null;
-  const index = 0;
   const TableName = 'redyn-example-table';
 
   before(async () => {
@@ -22,9 +21,8 @@ describe('commands', () => describe('lists', () => {
     const rpushOk2 = await client.rpush(key, 'value2', 'value3');
     assert(rpushOk2 === true, 'Expected RPUSH to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' } ] },
     });
   });
@@ -38,9 +36,8 @@ describe('commands', () => describe('lists', () => {
     const lpushOk2 = await client.lpush(key, 'value2', 'value3');
     assert(lpushOk2 === true, 'Expected LPUSH to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { L: [ { S: 'value3' }, { S: 'value2' }, { S: 'value' } ] },
     });
   });
@@ -54,9 +51,8 @@ describe('commands', () => describe('lists', () => {
     const rpushxOk = await client.rpushx(key, 'value2');
     assert(rpushxOk === true, 'Expected RPUSHX to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { L: [ { S: 'value' }, { S: 'value2' } ] },
     });
   });
@@ -70,9 +66,8 @@ describe('commands', () => describe('lists', () => {
     const lpushxOk = await client.lpushx(key, 'value2');
     assert(lpushxOk === true, 'Expected LPUSHX to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { L: [ { S: 'value2' }, { S: 'value' } ] },
     });
   });
@@ -83,7 +78,7 @@ describe('commands', () => describe('lists', () => {
     const rpushOk = await client.rpushx(key, 'value');
     assert(rpushOk === true, 'Expected RPUSH to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, null);
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, null);
   });
 
   it('should fail to lpushx a list silently', async () => {
@@ -92,7 +87,7 @@ describe('commands', () => describe('lists', () => {
     const rpushOk = await client.lpushx(key, 'value');
     assert(rpushOk === true, 'Expected RPUSH to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, null);
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, null);
   });
 
   it('should use lrange to read from a list', async () => {
@@ -102,7 +97,6 @@ describe('commands', () => describe('lists', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' } ] },
       },
     });
@@ -118,7 +112,6 @@ describe('commands', () => describe('lists', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' }, { S: 'value4' }, { S: 'value5' } ] },
       },
     });
@@ -134,7 +127,6 @@ describe('commands', () => describe('lists', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' }, { S: 'value4' }, { S: 'value5' } ] },
       },
     });
@@ -150,7 +142,6 @@ describe('commands', () => describe('lists', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' }, { S: 'value4' }, { S: 'value5' } ] },
       },
     });
@@ -158,9 +149,8 @@ describe('commands', () => describe('lists', () => {
     const result = await client.lset(key, 1, 'overwrite');
     assert(result === true, 'Expected LSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { L: [ { S: 'value' }, { S: 'overwrite' }, { S: 'value3' }, { S: 'value4' }, { S: 'value5' } ] },
     });
   });
@@ -172,7 +162,6 @@ describe('commands', () => describe('lists', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' }, { S: 'value4' }, { S: 'value5' } ] },
       },
     });
@@ -188,7 +177,6 @@ describe('commands', () => describe('lists', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { L: [ { S: 'value' }, { S: 'value2' }, { S: 'value3' }, { S: 'value4' }, { S: 'value5' } ] },
       },
     });

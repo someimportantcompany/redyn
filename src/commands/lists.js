@@ -1,7 +1,5 @@
 const { assert, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
-const index = 0;
-
 const transactables = {
 
   async rpush(handler, key, ...elements) {
@@ -15,7 +13,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key) OR attribute_type(#value, :type)',
         UpdateExpression: 'SET #value = list_append(if_not_exists(#value, :start), :append)',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -39,7 +37,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key) OR attribute_type(#value, :type)',
         UpdateExpression: 'SET #value = list_append(:prepend, if_not_exists(#value, :start))',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -62,7 +60,7 @@ const transactables = {
       await handler({
         Update: {
           TableName: tableName,
-          Key: marshall({ key, index }),
+          Key: marshall({ key }),
           ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
           UpdateExpression: 'SET #value = list_append(if_not_exists(#value, :start), :append)',
           ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -92,7 +90,7 @@ const transactables = {
       await handler({
         Update: {
           TableName: tableName,
-          Key: marshall({ key, index }),
+          Key: marshall({ key }),
           ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
           UpdateExpression: 'SET #value = list_append(:prepend, if_not_exists(#value, :start))',
           ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -119,7 +117,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_exists(#key) OR attribute_type(#value, :type)',
         UpdateExpression: `SET #value[${i}] = :value`,
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -144,7 +142,7 @@ const methods = {
 
     const params = {
       TableName: tableName,
-      Key: marshall({ key, index }),
+      Key: marshall({ key }),
       ConsistentRead: true,
     };
 
@@ -171,7 +169,7 @@ const methods = {
 
     const params = {
       TableName: tableName,
-      Key: marshall({ key, index }),
+      Key: marshall({ key }),
       ConsistentRead: true,
     };
 
@@ -189,11 +187,10 @@ const methods = {
     assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
-    assert(typeof index === 'number', new TypeError('Expected index to be a number'));
 
     const params = {
       TableName: tableName,
-      Key: marshall({ key, index }),
+      Key: marshall({ key }),
       ConsistentRead: true,
     };
 

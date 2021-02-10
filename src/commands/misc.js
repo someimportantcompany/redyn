@@ -27,8 +27,8 @@ const methods = {
 
     const params = {
       TableName: tableName,
-      ProjectionExpression: '#key, #index',
-      ExpressionAttributeNames: { '#key': 'key', '#index': 'index' },
+      ProjectionExpression: '#key',
+      ExpressionAttributeNames: { '#key': 'key' },
     };
 
     let startKey = null;

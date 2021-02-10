@@ -5,7 +5,6 @@ const { v4: uuid } = require('uuid');
 
 describe('commands', () => describe('sets', () => {
   let client = null;
-  const index = 0;
   const TableName = 'redyn-example-table';
 
   before(async () => {
@@ -23,9 +22,8 @@ describe('commands', () => describe('sets', () => {
     const saddOk3 = await client.sadd(key, 'value2');
     assert(saddOk3 === true, 'Expected SADD to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value', 'value2' ] },
     });
   });
@@ -37,7 +35,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -53,7 +50,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -70,7 +66,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -78,7 +73,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value2', 'value3', 'value4' ] },
       },
     });
@@ -96,7 +90,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -104,7 +97,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key3 },
-        index: { N: `${index}` },
         value: { SS: [ 'value2', 'value3', 'value4' ] },
       },
     });
@@ -112,9 +104,8 @@ describe('commands', () => describe('sets', () => {
     const size = await client.sdiffstore(key, key2, key3);
     assert.deepStrictEqual(size, 1, 'Expected SDIFFSTORE to return 1');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value' ] },
     });
   });
@@ -126,7 +117,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -143,7 +133,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value3', 'value5' ] },
       },
     });
@@ -151,7 +140,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value4' ] },
       },
     });
@@ -169,7 +157,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value3', 'value5' ] },
       },
     });
@@ -177,7 +164,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key3 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value4' ] },
       },
     });
@@ -185,9 +171,8 @@ describe('commands', () => describe('sets', () => {
     const size = await client.sinterstore(key, key2, key3);
     assert.deepStrictEqual(size, 1, 'Expected SINTERSTORE to return 1');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value' ] },
     });
   });
@@ -199,7 +184,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -216,7 +200,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -224,7 +207,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value2', 'value3', 'value4' ] },
       },
     });
@@ -232,14 +214,12 @@ describe('commands', () => describe('sets', () => {
     const moved = await client.smove(key, key2, 'value');
     assert.strictEqual(moved, true, 'Expected SMOVE to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value2', 'value3' ] },
     });
-    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2 }) }, {
       key: { S: key2 },
-      index: { N: `${index}` },
       value: { SS: [ 'value', 'value2', 'value3', 'value4' ] },
     });
   });
@@ -251,7 +231,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -259,9 +238,8 @@ describe('commands', () => describe('sets', () => {
     const removed = await client.srem(key, 'value');
     assert.strictEqual(removed, true, 'Expected SREM to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value2', 'value3' ] },
     });
   });
@@ -273,7 +251,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value3' ] },
       },
     });
@@ -281,9 +258,8 @@ describe('commands', () => describe('sets', () => {
     const removed = await client.srem(key, 'value', 'value2', 'value4');
     assert.strictEqual(removed, true, 'Expected SREM to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value3' ] },
     });
   });
@@ -296,7 +272,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value3' ] },
       },
     });
@@ -304,7 +279,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2' ] },
       },
     });
@@ -322,7 +296,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value3', 'value5' ] },
       },
     });
@@ -330,7 +303,6 @@ describe('commands', () => describe('sets', () => {
       TableName,
       Item: {
         key: { S: key3 },
-        index: { N: `${index}` },
         value: { SS: [ 'value', 'value2', 'value4' ] },
       },
     });
@@ -338,9 +310,8 @@ describe('commands', () => describe('sets', () => {
     const size = await client.sunionstore(key, key2, key3);
     assert.deepStrictEqual(size, 5, 'Expected SUNIONSTORE to return 1');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { SS: [ 'value', 'value2', 'value3', 'value4', 'value5' ] },
     });
   });

@@ -5,7 +5,6 @@ const { v4: uuid } = require('uuid');
 
 describe('commands', () => describe('hashes', () => {
   let client = null;
-  const index = 0;
   const TableName = 'redyn-example-table';
 
   before(async () => {
@@ -19,9 +18,8 @@ describe('commands', () => describe('hashes', () => {
     const result = await client.hset(key, 'field', 'value');
     assert(result === true, 'Expected HSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { M: { field: { S: 'value' } } },
     });
   });
@@ -33,7 +31,6 @@ describe('commands', () => describe('hashes', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { M: { field: { S: 'value' } } },
       },
     });
@@ -41,9 +38,8 @@ describe('commands', () => describe('hashes', () => {
     const result = await client.hset(key, 'field2', 'value2');
     assert(result === true, 'Expected HSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { M: { field: { S: 'value' }, field2: { S: 'value2' } } },
     });
   });
@@ -54,9 +50,8 @@ describe('commands', () => describe('hashes', () => {
     const result = await client.hset(key, { field: 'value' });
     assert(result === true, 'Expected HSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { M: { field: { S: 'value' } } },
     });
   });
@@ -68,7 +63,6 @@ describe('commands', () => describe('hashes', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { M: { field: { S: 'value' } } },
       },
     });
@@ -76,9 +70,8 @@ describe('commands', () => describe('hashes', () => {
     const result = await client.hset(key, { field2: 'value2' });
     assert(result === true, 'Expected HSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { M: { field: { S: 'value' }, field2: { S: 'value2' } } },
     });
   });
@@ -90,7 +83,6 @@ describe('commands', () => describe('hashes', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { M: { field: { S: 'value' } } },
       },
     });
@@ -106,7 +98,6 @@ describe('commands', () => describe('hashes', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { M: { field: { S: 'value' } } },
       },
     });
@@ -122,7 +113,6 @@ describe('commands', () => describe('hashes', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { M: { field: { S: 'value' } } },
       },
     });
@@ -130,9 +120,8 @@ describe('commands', () => describe('hashes', () => {
     const result = await client.hincrby(key, 'field2', 1);
     assert.strictEqual(result, true, 'Expected HINCRBY to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { M: { field: { S: 'value' }, field2: { N: '1' } } },
     });
   });
@@ -144,7 +133,6 @@ describe('commands', () => describe('hashes', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { M: { field: { S: 'value' }, field2: { S: 'value2' } } },
       },
     });
@@ -159,9 +147,8 @@ describe('commands', () => describe('hashes', () => {
     const result = await client.hmset(key, { field: 'value' });
     assert(result === true, 'Expected HMSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { M: { field: { S: 'value' } } },
     });
   });

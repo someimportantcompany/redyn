@@ -1,7 +1,5 @@
 const { assert, formatKeyValueObject, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
-const index = 0;
-
 const transactables = {
 
   async hget(handler, key, field) {
@@ -14,7 +12,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: '#key, #value.#field',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value', '#field': field },
       },
@@ -33,7 +31,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: '#key, #value',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
       },
@@ -54,7 +52,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
         UpdateExpression: 'SET #value.#field = if_not_exists(#value.#field, :start) + :incr',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value', '#field': field },
@@ -74,7 +72,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: '#key, #value',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
       },
@@ -93,7 +91,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: '#key, #value',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
       },
@@ -125,7 +123,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: expression.join(', '),
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value', ...names },
       },
@@ -145,7 +143,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: '#key, #value.#field',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value', '#field': field },
       },
@@ -164,7 +162,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ProjectionExpression: '#key, #value',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
       },
@@ -201,7 +199,7 @@ const methods = {
 
       const params = {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
         UpdateExpression: `SET ${expression.join(', ')}`,
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value', ...names },
@@ -214,7 +212,7 @@ const methods = {
 
       const params = {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key)',
         UpdateExpression: 'SET #value = :values',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },

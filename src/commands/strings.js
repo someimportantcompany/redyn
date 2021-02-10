@@ -1,7 +1,5 @@
 const { assert, buildTTL, formatKeyValueObject, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
-const index = 0;
-
 const transactables = {
 
   async get(handler, key, opts = undefined) {
@@ -18,7 +16,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConsistentRead: opts.consistentRead,
       },
     });
@@ -44,7 +42,7 @@ const transactables = {
     await handler({
       Put: {
         TableName: tableName,
-        Item: marshall({ key, index, ttl, value }),
+        Item: marshall({ key, ttl, value }),
       },
     });
 
@@ -61,7 +59,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key) OR attribute_type(#value, :type)',
         UpdateExpression: 'SET #value = if_not_exists(#value, :start) + :incr',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -81,7 +79,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key) OR attribute_type(#value, :type)',
         UpdateExpression: 'SET #value = if_not_exists(#value, :start) - :decr',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -116,7 +114,7 @@ const methods = {
         return {
           Get: {
             TableName: tableName,
-            Key: marshall({ key, index }),
+            Key: marshall({ key }),
           },
         };
       });
@@ -152,7 +150,7 @@ const methods = {
         return {
           Put: {
             TableName: tableName,
-            Item: marshall({ key, index, value }),
+            Item: marshall({ key, value }),
           },
         };
       });

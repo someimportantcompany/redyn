@@ -1,8 +1,6 @@
 const { assert, isDynamoDB, isPlainObject, isSet, marshall, unmarshall } = require('../utils');
 /* eslint-disable no-invalid-this */
 
-const index = 0;
-
 function getSetType(member) {
   if (member instanceof Buffer) {
     return 'BS';
@@ -33,7 +31,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key) OR attribute_type(#value, :type)',
         UpdateExpression: 'ADD #value :members',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -53,7 +51,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConsistentRead: true,
       },
     });
@@ -72,7 +70,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConsistentRead: true,
       },
     });
@@ -91,7 +89,7 @@ const transactables = {
     const result = await handler({
       Get: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConsistentRead: true,
       },
     });
@@ -113,7 +111,7 @@ const transactables = {
     await handler({
       Update: {
         TableName: tableName,
-        Key: marshall({ key, index }),
+        Key: marshall({ key }),
         ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
         UpdateExpression: 'DELETE #value :members',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -150,7 +148,7 @@ const methods = {
 
     const params = {
       TableName: tableName,
-      Key: marshall({ key, index }),
+      Key: marshall({ key }),
       ConsistentRead: true,
     };
 
@@ -172,7 +170,7 @@ const methods = {
       {
         Update: {
           TableName: tableName,
-          Key: marshall({ key: source, index }),
+          Key: marshall({ key: source }),
           ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type) AND contains(#value, :member)',
           UpdateExpression: 'DELETE #value :members',
           ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -182,7 +180,7 @@ const methods = {
       {
         Update: {
           TableName: tableName,
-          Key: marshall({ key: destination, index }),
+          Key: marshall({ key: destination }),
           ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
           UpdateExpression: 'ADD #value :members',
           ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
@@ -216,7 +214,7 @@ async function setfetch(keys) {
   const TransactItems = keys.map(key => ({
     Get: {
       TableName: tableName,
-      Key: marshall({ key, index }),
+      Key: marshall({ key }),
     },
   }));
 
@@ -243,7 +241,7 @@ async function setstore(method, destination, ...keys) {
 
   const params = {
     TableName: tableName,
-    Item: marshall({ key: destination, index, value: new Set(value) }),
+    Item: marshall({ key: destination, value: new Set(value) }),
   };
 
   await client.putItem(params).promise();

@@ -5,7 +5,6 @@ const { v4: uuid } = require('uuid');
 
 describe('commands', () => describe('strings', () => {
   let client = null;
-  const index = 0;
   const TableName = 'redyn-example-table';
 
   before(async () => {
@@ -20,7 +19,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { S: 'example-value' },
       },
     });
@@ -35,9 +33,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.set(key, 'example-value');
     assert(result === true, 'Expected SET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { S: 'example-value' },
     });
   });
@@ -49,7 +46,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { N: '1.23' },
       },
     });
@@ -64,9 +60,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.set(key, 1);
     assert(result === true, 'Expected SET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { N: '1' },
     });
   });
@@ -77,9 +72,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.incr(key);
     assert(result === true, 'Expected INCR to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { N: '1' },
     });
   });
@@ -90,9 +84,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.incrby(key, 5);
     assert(result === true, 'Expected INCRBY to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { N: '5' },
     });
   });
@@ -104,7 +97,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { N: '5' },
       },
     });
@@ -112,9 +104,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.decr(key);
     assert(result === true, 'Expected DECR to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { N: '4' },
     });
   });
@@ -126,7 +117,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { N: '10' },
       },
     });
@@ -134,9 +124,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.decrby(key, 5);
     assert(result === true, 'Expected DECRBY to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { N: '5' },
     });
   });
@@ -148,7 +137,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { S: 'example-value' },
       },
     });
@@ -166,7 +154,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key },
-        index: { N: `${index}` },
         value: { S: 'example-value' },
       },
     });
@@ -174,7 +161,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key2 },
-        index: { N: `${index}` },
         value: { S: 'example-value2' },
       },
     });
@@ -182,7 +168,6 @@ describe('commands', () => describe('strings', () => {
       TableName,
       Item: {
         key: { S: key3 },
-        index: { N: `${index}` },
         value: { S: 'example-value3' },
       },
     });
@@ -197,9 +182,8 @@ describe('commands', () => describe('strings', () => {
     const result = await client.mset(key, 'example-value');
     assert.deepStrictEqual(result, true, 'Expected MSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { S: 'example-value' },
     });
   });
@@ -212,19 +196,16 @@ describe('commands', () => describe('strings', () => {
     const result = await client.mset(key, 'example-value', key2, 'example-value2', key3, 'example-value3');
     assert.deepStrictEqual(result, true, 'Expected MSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { S: 'example-value' },
     });
-    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2 }) }, {
       key: { S: key2 },
-      index: { N: `${index}` },
       value: { S: 'example-value2' },
     });
-    await assertItem(dynamodb, { TableName, Key: marshall({ key: key3, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key3 }) }, {
       key: { S: key3 },
-      index: { N: `${index}` },
       value: { S: 'example-value3' },
     });
   });
@@ -241,19 +222,16 @@ describe('commands', () => describe('strings', () => {
     });
     assert.deepStrictEqual(result, true, 'Expected MSET to return true');
 
-    await assertItem(dynamodb, { TableName, Key: marshall({ key, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
-      index: { N: `${index}` },
       value: { S: 'example-value' },
     });
-    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key2 }) }, {
       key: { S: key2 },
-      index: { N: `${index}` },
       value: { S: 'example-value2' },
     });
-    await assertItem(dynamodb, { TableName, Key: marshall({ key: key3, index }) }, {
+    await assertItem(dynamodb, { TableName, Key: marshall({ key: key3 }) }, {
       key: { S: key3 },
-      index: { N: `${index}` },
       value: { S: 'example-value3' },
     });
   });

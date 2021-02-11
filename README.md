@@ -126,6 +126,27 @@ const client = redyn.createClient('redyn-example-cache');
 
 ### Using strings
 
+**`client.decr(key)`**
+
+Decrements the number stored at `key` by one. If the key does not exist, it is set to `0` before performing the operation.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+This method supports `WRITE` transactions.
+
+**`client.decrby(key, decrement)`**
+
+Decrements the number stored at `key` by `decrement`. If the key does not exist, it is set to `0` before performing the operation.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `decrement` | Number | **Required** |
+
+This method supports `WRITE` transactions.
+
 **`client.get(key[, opts])`**
 
 Get the value of key. If the key does not exist then `null` is returned. An error is returned if the value stored at key is not a string, because `GET` only handles string values.
@@ -137,36 +158,9 @@ Get the value of key. If the key does not exist then `null` is returned. An erro
 
 This method supports `READ` transactions.
 
-**`client.set(key, value[, opts])`**
-
-Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type. Any previous time to live associated with the key is discarded on successful `SET` operation.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `value` | String | **Required** |
-| `opts.ex` | Number | Optionally set the spcified expire time, in seconds |
-| `opts.exat` | Number | Optionally set the specified UNIX time at which the key will expire, in seconds |
-| `opts.nx` | Boolean | Only set if the key does not already exist |
-| `opts.xx` | Boolean | Only set if the key already exists |
-
-- `PX` & `PXAT` is unsupported as DynamoDB's TTL feature does not support milliseconds.
-
-This method supports `WRITE` transactions.
-
 **`client.incr(key)`**
 
 Increments the number stored at `key` by one. If the key does not exist, it is set to `0` before performing the operation.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-
-This method supports `WRITE` transactions.
-
-**`client.decr(key)`**
-
-Decrements the number stored at `key` by one. If the key does not exist, it is set to `0` before performing the operation.
 
 | Property | Type | Description |
 | ---- | ---- | ---- |
@@ -182,17 +176,6 @@ Increments the number stored at `key` by `increment`. If the key does not exist,
 | ---- | ---- | ---- |
 | `key` | String | **Required** |
 | `increment` | Number | **Required** |
-
-This method supports `WRITE` transactions.
-
-**`client.decrby(key, decrement)`**
-
-Decrements the number stored at `key` by `decrement`. If the key does not exist, it is set to `0` before performing the operation.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `decrement` | Number | **Required** |
 
 This method supports `WRITE` transactions.
 
@@ -213,6 +196,23 @@ Sets the given keys to their respective values. `MSET` replaces existing values 
 | `key` | String | **Required** Each key argument is a string |
 | `value` | String | **Required** Each value argument is a string |
 
+**`client.set(key, value[, opts])`**
+
+Set key to hold the string value. If key already holds a value, it is overwritten, regardless of its type. Any previous time to live associated with the key is discarded on successful `SET` operation.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `value` | String | **Required** |
+| `opts.ex` | Number | Optionally set the spcified expire time, in seconds |
+| `opts.exat` | Number | Optionally set the specified UNIX time at which the key will expire, in seconds |
+| `opts.nx` | Boolean | Only set if the key does not already exist |
+| `opts.xx` | Boolean | Only set if the key already exists |
+
+- `PX` & `PXAT` is unsupported as DynamoDB's TTL feature does not support milliseconds.
+
+This method supports `WRITE` transactions.
+
 **`client.strlen(key)`**
 
 Returns the length of the string value stored at `key`, or `0` when `key` does not exist. An error is returned when key holds a non-string value.
@@ -223,31 +223,36 @@ Returns the length of the string value stored at `key`, or `0` when `key` does n
 
 ### Using lists
 
-**`client.rpush(key, element[, element ...])`**
+**`client.lindex(key, index)`**
 
-Insert all the specified values at the tail of the list stored at `key`. If `key` does not exist, it is created as empty list before performing the push operation. When `key` holds a value that is not a list, an error is returned.
+Returns the element at index index in the list stored at key. The index is zero-based, so 0 means the first element, 1 the second element and so on.
 
 | Property | Type | Description |
 | ---- | ---- | ---- |
 | `key` | String | **Required** |
-| `element` | String | **At least 1 required**, each element must be a string |
+| `index` | Number | **Required** |
 
-This method supports `WRITE` transactions.
+**`client.llen(key, index)`**
+
+Returns the length of the list stored at key. If key does not exist, it is interpreted as an empty list and 0 is returned. An error is returned when the value stored at key is not a list.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+**`client.lrange(key, start, stop)`**
+
+Returns the specified elements of the list stored at `key`. The offsets `start` and `stop` are zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being the next element and so on.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `start` | Number | **Required** |
+| `stop` | Number | **Required** |
 
 **`client.lpush(key, element[, element ...])`**
 
 Insert all the specified values at the head of the list stored at `key`. If `key` does not exist, it is created as empty list before performing the push operation. When `key` holds a value that is not a list, an error is returned.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `element` | String | **At least 1 required**, each element must be a string |
-
-This method supports `WRITE` transactions.
-
-**`client.rpushx(key, element[, element ...])`**
-
-Insert all the specified values at the tail of the list stored at `key`, only if `key` already exists & holds a list.
 
 | Property | Type | Description |
 | ---- | ---- | ---- |
@@ -279,32 +284,27 @@ Sets the list element at `index` to `element`.
 
 This method supports `WRITE` transactions.
 
-**`client.lrange(key, start, stop)`**
+**`client.rpush(key, element[, element ...])`**
 
-Returns the specified elements of the list stored at `key`. The offsets `start` and `stop` are zero-based indexes, with 0 being the first element of the list (the head of the list), 1 being the next element and so on.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `start` | Number | **Required** |
-| `stop` | Number | **Required** |
-
-**`client.lindex(key, index)`**
-
-Returns the element at index index in the list stored at key. The index is zero-based, so 0 means the first element, 1 the second element and so on.
+Insert all the specified values at the tail of the list stored at `key`. If `key` does not exist, it is created as empty list before performing the push operation. When `key` holds a value that is not a list, an error is returned.
 
 | Property | Type | Description |
 | ---- | ---- | ---- |
 | `key` | String | **Required** |
-| `index` | Number | **Required** |
+| `element` | String | **At least 1 required**, each element must be a string |
 
-**`client.llen(key, index)`**
+This method supports `WRITE` transactions.
 
-Returns the length of the list stored at key. If key does not exist, it is interpreted as an empty list and 0 is returned. An error is returned when the value stored at key is not a list.
+**`client.rpushx(key, element[, element ...])`**
+
+Insert all the specified values at the tail of the list stored at `key`, only if `key` already exists & holds a list.
 
 | Property | Type | Description |
 | ---- | ---- | ---- |
 | `key` | String | **Required** |
+| `element` | String | **At least 1 required**, each element must be a string |
+
+This method supports `WRITE` transactions.
 
 ### Using hashmaps
 
@@ -374,6 +374,25 @@ For every `field` that does not exist in the hash, a `null` value is returned. B
 
 This method supports `READ` transactions.
 
+**`client.hset(key, field, value[, field, value, ... ...])`**
+
+Sets `field` in the hash stored at `key` to `value`. If `key` does not exist, a new `key` holding a hash is created. If `field` already exists in the hash, it is overwritten.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `field` | String | **Required**, each field should be a string |
+| `value` | String | **Required**, each value should be a string |
+
+**`client.hset(key, object)`**
+
+Sets each `key` `value` pair in the object into the hash stored at `key`. If `key` does not exist, a new `key` holding a hash is created. If `field` already exists in the hash, it is overwritten.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `object` | Object | **Required** |
+
 **`client.hstrlen(key, field)`**
 
 Returns the string length of the value associated with `field` in the hash stored at `key`. If the `key` or the `field` do not exist, `0` is returned.
@@ -394,25 +413,6 @@ Returns all field values in the hash stored at `key`.
 | `key` | String | **Required** |
 
 This method supports `READ` transactions.
-
-**`client.hset(key, field, value[, field, value, ... ...])`**
-
-Sets `field` in the hash stored at `key` to `value`. If `key` does not exist, a new `key` holding a hash is created. If `field` already exists in the hash, it is overwritten.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `field` | String | **Required**, each field should be a string |
-| `value` | String | **Required**, each value should be a string |
-
-**`client.hset(key, object)`**
-
-Sets each `key` `value` pair in the object into the hash stored at `key`. If `key` does not exist, a new `key` holding a hash is created. If `field` already exists in the hash, it is overwritten.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `object` | Object | **Required** |
 
 ### Using sets
 
@@ -438,39 +438,6 @@ Returns the set cardinality (number of elements) of the set stored at `key`.
 | `key` | String | **Required** |
 
 This method supports `READ` transactions.
-
-**`client.sismember(key, member)`**
-
-Returns `true` if `member` is a member of the set stored at `key`.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `member` | String / Number / Buffer | **Required** |
-
-This method supports `READ` transactions.
-
-**`client.smismember(key, member[, member ...])`**
-
-Returns whether each `member` is a member of the set stored at `key`. For every member, `true` is returned if the value is a member of the set, or `false` if the element is not a member of the set or if `key` does not exist.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `member` | String / Number / Buffer | **Required** |
-
-This method supports `READ` transactions.
-
-**`client.srem(key, member[, member ...])`**
-
-Remove the specified members from the set stored at `key`. Specified members that are not a member of this set are ignored.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `member` | String / Number / Buffer | **Required** |
-
-This method supports `WRITE` transactions.
 
 **`client.sdiff(key[, key ...])`**
 
@@ -506,6 +473,39 @@ Identical to `SINTER`, but instead of returning the resulting set, it is stored 
 | `destination` | String | **Required** |
 | `key` | String | **Required** |
 
+**`client.sismember(key, member)`**
+
+Returns `true` if `member` is a member of the set stored at `key`.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `member` | String / Number / Buffer | **Required** |
+
+This method supports `READ` transactions.
+
+**`client.smismember(key, member[, member ...])`**
+
+Returns whether each `member` is a member of the set stored at `key`. For every member, `true` is returned if the value is a member of the set, or `false` if the element is not a member of the set or if `key` does not exist.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `member` | String / Number / Buffer | **Required** |
+
+This method supports `READ` transactions.
+
+**`client.srem(key, member[, member ...])`**
+
+Remove the specified members from the set stored at `key`. Specified members that are not a member of this set are ignored.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `member` | String / Number / Buffer | **Required** |
+
+This method supports `WRITE` transactions.
+
 **`client.sunion(key[, key ...])`**
 
 Returns the members of the set resulting from the union of all the given sets. Keys that do not exist are considered to be empty sets.
@@ -526,6 +526,17 @@ Identical to `SUNION`, but instead of returning the resulting set, it is stored 
 ### Other methods
 
 - PEXPIRE, PEXPIREAT, PTTL are unsupported as DynamoDB doesn't support millisecond TTL.
+
+**`client.copy(source, destination[, opts])`**
+
+This command copies the value stored at the `source` key to the `destination` key. Copy the item to another DynamoDB table with `opts.destinationDb`. An error is thrown if destination already exists, unless `opts.replace` is set to `true`.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `source` | String | **Required** |
+| `destination` | String | **Required** |
+| `opts.destinationDb` | String | Optionally copy to a different DynamoDB table |
+| `opts.replace` | Boolean | Set to `true` to overwrite the contents of `destination` |
 
 **`client.del(key[, key])`**
 
@@ -577,14 +588,18 @@ Set a timeout on `key`. After the timeout has expired, the key will automaticall
 
 This method supports `WRITE` transactions.
 
-**`client.move(key, destination)`**
+**`client.flushdb()`**
 
-Move `key` from the currently database to the specified `destination` database. When `key` already exists in the `destination` database, or it does not exist in the `source` database, it does nothing.
+Delete all the keys in this database, iterating through keys with [DynamoDB's scan](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Scan.html) until no more remain.
+
+**`client.move(key, db)`**
+
+Move `key` from the currently database to the specified destination database. When `key` already exists in the destination `db`, or it does not exist in the source database, it does nothing.
 
 | Property | Type | Description |
 | ---- | ---- | ---- |
 | `key` | String | **Required** |
-| `destination` | String | **Required**, the other DynamoDB table to move this key to |
+| `db` | String | **Required** |
 
 **`client.persist(key)`**
 
@@ -637,30 +652,6 @@ Returns the string representation of the type of the value stored at `key`. The 
 | `key` | String | **Required** |
 
 This method supports `READ` transactions.
-
-**`client.copy(source, destination[, opts])`**
-
-This command copies the value stored at the `source` key to the `destination` key. Copy the item to another DynamoDB table with `opts.destinationDb`. An error is thrown if destination already exists, unless `opts.replace` is set to `true`.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `source` | String | **Required** |
-| `destination` | String | **Required** |
-| `opts.destinationDb` | String | Optionally copy to a different DynamoDB table |
-| `opts.replace` | Boolean | Set to `true` to overwrite the contents of `destination` |
-
-**`client.flushdb()`**
-
-Delete all the keys in this database, iterating through keys with [DynamoDB's scan](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Scan.html) until no more remain.
-
-**`client.move(key, db)`**
-
-Move `key` from the current database to the specified DynamoDB database. When `key` already exists in `db`, or it does not exist in the source database, it does nothing.
-
-| Property | Type | Description |
-| ---- | ---- | ---- |
-| `key` | String | **Required** |
-| `db` | String | **Required** |
 
 ### Transactions
 

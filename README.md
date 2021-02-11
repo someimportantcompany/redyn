@@ -472,9 +472,195 @@ Remove the specified members from the set stored at `key`. Specified members tha
 
 This method supports `WRITE` transactions.
 
+**`client.sdiff(key[, key ...])`**
+
+Returns the members of the set resulting from the difference between the first set and all the successive sets. Keys that do not exist are considered to be empty sets.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+**`client.sdiffstore(destination, key[, key ...])`**
+
+Identical to `SDIFF`, but instead of returning the resulting set, it is stored in `destination`. If `destination` already exists, it is overwritten.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `destination` | String | **Required** |
+| `key` | String | **Required** |
+
+**`client.sinter(key[, key ...])`**
+
+Returns the members of the set resulting from the intersection of all the given sets. Keys that do not exist are considered to be empty sets. With one of the keys being an empty set, the resulting set is also empty (since set intersection with an empty set always results in an empty set).
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+**`client.sinterstore(destination, key[, key ...])`**
+
+Identical to `SINTER`, but instead of returning the resulting set, it is stored in `destination`. If `destination` already exists, it is overwritten.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `destination` | String | **Required** |
+| `key` | String | **Required** |
+
+**`client.sunion(key[, key ...])`**
+
+Returns the members of the set resulting from the union of all the given sets. Keys that do not exist are considered to be empty sets.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+**`client.sunionstore(destination, key[, key ...])`**
+
+Identical to `SUNION`, but instead of returning the resulting set, it is stored in `destination`. If `destination` already exists, it is overwritten.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `destination` | String | **Required** |
+| `key` | String | **Required** |
+
 ### Other methods
 
 - PEXPIRE, PEXPIREAT, PTTL are unsupported as DynamoDB doesn't support millisecond TTL.
+
+**`client.del(key[, key])`**
+
+Removes the specified keys. A `key` is ignored if it does not exist.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+This method supports `WRITE` transactions, however in transactions this method accepts a single key argument.
+
+<!--**`client.dump(key)`**
+
+Serialize the value stored at key in a specific format and return it to the user. The returned value can be synthesized back into a key using the `RESTORE` command.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |-->
+
+**`client.exists(key[, key ...])`**
+
+Returns if key exists. Specify multiple keys instead of a single one to return the total number of keys existing. If the same existing `key` is mentioned in the arguments multiple times, it will be counted multiple times. So if `somekey` exists, `exists('somekey', 'somekey')` will return `2`.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+This method supports `READ` transactions, however in transactions this method accepts a single key argument.
+
+**`client.expire(key, seconds)`**
+
+Set a timeout on `key`. After the timeout has expired, the key will automatically be deleted. A key with an associated timeout is often said to be "volatile".
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `seconds` | String | **Required**, number of seconds until the item expires |
+
+This method supports `WRITE` transactions.
+
+**`client.expireat(key, timestamp)`**
+
+Set a timeout on `key`. After the timeout has expired, the key will automatically be deleted. A key with an associated timeout is often said to be "volatile".
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `timestamp` | Date | **Required**, a Date instance for when the item will expire |
+
+This method supports `WRITE` transactions.
+
+**`client.move(key, destination)`**
+
+Move `key` from the currently database to the specified `destination` database. When `key` already exists in the `destination` database, or it does not exist in the `source` database, it does nothing.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `destination` | String | **Required**, the other DynamoDB table to move this key to |
+
+**`client.persist(key)`**
+
+Remove the existing timeout on `key`, turning the `key` from *volatile* (a key with an expire set) to *persistent* (a key that will never expire as no timeout is associated).
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+This method supports `WRITE` transactions.
+
+**`client.rename(key, newKey)`**
+
+Renames `key` to `newkey`. It returns an error when `key` does not exist. If `newkey` already exists it is overwritten.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `newKey` | String | **Required** |
+
+This method supports `WRITE` transactions.
+
+**`client.renamenx(key, newKey)`**
+
+Renames `key` to `newkey` if `newkey` does not yet exist. It returns an error when `key` does not exist.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `newKey` | String | **Required** |
+
+This method supports `WRITE` transactions.
+
+**`client.ttl(key)`**
+
+Returns the remaining time to live of a `key` that has a timeout. This introspection capability allows a client to check how many seconds a given `key` will continue to be part of the dataset.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+This method supports `READ` transactions.
+
+**`client.type(key)`**
+
+Returns the string representation of the type of the value stored at `key`. The different types that can be returned are: `string`, `list`, `set`, and `hash`.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+
+This method supports `READ` transactions.
+
+**`client.copy(source, destination[, opts])`**
+
+This command copies the value stored at the `source` key to the `destination` key. Copy the item to another DynamoDB table with `opts.destinationDb`. An error is thrown if destination already exists, unless `opts.replace` is set to `true`.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `source` | String | **Required** |
+| `destination` | String | **Required** |
+| `opts.destinationDb` | String | Optionally copy to a different DynamoDB table |
+| `opts.replace` | Boolean | Set to `true` to overwrite the contents of `destination` |
+
+**`client.flushdb()`**
+
+Delete all the keys in this database, iterating through keys with [DynamoDB's scan](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Scan.html) until no more remain.
+
+**`client.move(key, db)`**
+
+Move `key` from the current database to the specified DynamoDB database. When `key` already exists in `db`, or it does not exist in the source database, it does nothing.
+
+| Property | Type | Description |
+| ---- | ---- | ---- |
+| `key` | String | **Required** |
+| `db` | String | **Required** |
 
 ### Transactions
 

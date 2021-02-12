@@ -7,6 +7,7 @@ require('module-alias/register');
 
   moduleAlias.addAliases({
     redyn: path.resolve(__dirname, '../'),
+    '@test': path.resolve(__dirname),
   });
 })();
 

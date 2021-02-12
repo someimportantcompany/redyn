@@ -1,6 +1,6 @@
 const assert = require('assert');
 const redyn = require('redyn');
-const { dynamodb, assertItem, deleteThenCreateExampleTable, marshall, writeItem } = require('../utils');
+const { dynamodb, assertItem, deleteThenCreateExampleTable, marshall, writeItem } = require('@test/utils');
 const { v4: uuid } = require('uuid');
 
 describe('commands', () => describe('strings', () => {

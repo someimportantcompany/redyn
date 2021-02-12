@@ -4,5 +4,5 @@
   "sort": true,
   "require": [ "./test/bootstrap.js" ],
   "ignore": [ "*node_modules*" ],
-  "spec": [ "./test/*.test.js", "./test/**/*.test.js" ]
+  "spec": [ "./*.test.js", "./commands/*.test.js" ]
 }

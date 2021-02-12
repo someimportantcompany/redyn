@@ -2,7 +2,7 @@ const _isPlainObject = require('lodash/isPlainObject');
 const assert = require('assert');
 const AWS = require('aws-sdk');
 const exampleTable = require('../createTable.json');
-const { marshall } = require('../src/utils');
+const { marshall } = require('../utils');
 
 async function assertItem(dynamodb, getItemOpts, expected) {
   assert(dynamodb instanceof AWS.DynamoDB, 'Expected assertItem dynamodb to be an instance of AWS.DynamoDB');

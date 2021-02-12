@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const isPlainObject = require('lodash.isplainobject');
 const ms = require('ms');
-const { name: packageName } = require('../package.json');
+const { name: packageName } = require('./package.json');
 
 const TEN_YEARS_MS = 60 * 60 * 24 * 7 * 52 * 10 * 1000;
 

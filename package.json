@@ -2,31 +2,20 @@
   "name": "redyn",
   "version": "0.0.1",
   "description": "Redis-like implementation stored in DynamoDB",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "nyc --reporter=lcov --reporter=text mocha --config ./.mocharc.json",
     "preversion": "npm run lint && npm test",
     "postversion": "git push && git push --tags"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jdrydn/redyn.git"
-  },
-  "keywords": [
-    "dynamodb",
-    "dynamo",
-    "aws",
-    "amazon",
-    "redis",
-    "key-value"
-  ],
+  "repository": "https://github.com/jdrydn/redyn",
+  "bugs": "https://github.com/jdrydn/redyn/issues",
+  "homepage": "https://github.com/jdrydn/redyn#readme",
   "author": "James D <james@jdrydn.com> (https://jdrydn.com)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jdrydn/redyn/issues"
-  },
-  "homepage": "https://github.com/jdrydn/redyn#readme",
+  "keywords": [ "dynamodb", "dynamo", "aws", "amazon", "redis", "key-value" ],
+  "files": [ "*.js", "!*.test.js", "commands/*.js", "!commands/*.test.js" ],
   "dependencies": {
     "aws-sdk": "^2.824.0",
     "lodash.isplainobject": "^4.0.6"

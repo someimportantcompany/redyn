@@ -3,7 +3,8 @@ const { assert, isDynamoDB, isPlainObject } = require('./utils');
 class RedynTransactionBlock {
   constructor(name, command, args) {
     assert(typeof name === 'string' && name.length, new TypeError('Expected name to be a string'));
-    assert(typeof name === 'string' && name.length, new TypeError('Expected name to be a string'));
+    assert(typeof command === 'string' && command.length, new TypeError('Expected command to be a string'));
+    assert(Array.isArray(args), new TypeError('Expected args to be an array'));
 
     Object.defineProperties(this, {
       name: { enumerable: true, value: name },

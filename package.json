@@ -9,9 +9,9 @@
     "preversion": "npm run lint && npm test",
     "postversion": "git push && git push --tags"
   },
-  "repository": "https://github.com/jdrydn/redyn",
-  "bugs": "https://github.com/jdrydn/redyn/issues",
-  "homepage": "https://github.com/jdrydn/redyn#readme",
+  "repository": "https://github.com/someimportantcompany/redyn",
+  "bugs": "https://github.com/someimportantcompany/redyn/issues",
+  "homepage": "https://github.com/someimportantcompany/redyn#readme",
   "author": "James D <james@jdrydn.com> (https://jdrydn.com)",
   "license": "MIT",
   "keywords": [ "dynamodb", "dynamo", "aws", "amazon", "redis", "key-value" ],

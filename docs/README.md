@@ -1,8 +1,8 @@
 # redyn
-{: .no_toc }
+{: .fs-9 }
 
-# [Promise](https://onezero.medium.com/mewe-sold-itself-on-privacy-then-the-radical-right-arrived-e527b38e4718)-first [Redis](https://redis.io)-implementation for [NodeJS](https://nodejs.org) backed by [DynamoDB](https://aws.amazon.com/dynamodb).
-{: .no_toc }
+[Promise](https://onezero.medium.com/mewe-sold-itself-on-privacy-then-the-radical-right-arrived-e527b38e4718)-first [Redis](https://redis.io)-implementation for [NodeJS](https://nodejs.org) backed by [DynamoDB](https://aws.amazon.com/dynamodb).
+{: .fs-6 .fw-300 }
 
 1. TOC
 {:toc}

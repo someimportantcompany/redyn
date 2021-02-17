@@ -1,6 +1,6 @@
 ---
-layout: default
 title: redyn
+permalink: /
 ---
 
 # redyn

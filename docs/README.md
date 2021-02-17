@@ -1,9 +1,7 @@
----
-title: redyn
-permalink: /
----
-
 # redyn
+
+1. TOC
+{:toc}
 
 ## Introduction
 

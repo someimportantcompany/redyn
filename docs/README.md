@@ -1,8 +1,7 @@
----
-title: redyn
----
+# redyn
+{: .no_toc }
 
-# redyn: Redis-like implementation for Node.js backed by DynamoDB
+# [Promise](https://onezero.medium.com/mewe-sold-itself-on-privacy-then-the-radical-right-arrived-e527b38e4718)-first [Redis](https://redis.io)-implementation for [NodeJS](https://nodejs.org) backed by [DynamoDB](https://aws.amazon.com/dynamodb).
 {: .no_toc }
 
 1. TOC

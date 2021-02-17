@@ -1,7 +1,12 @@
+---
+title: redyn
+---
+
 # redyn: Redis-like implementation for Node.js backed by DynamoDB
 {: .no_toc }
 
-1. TOC {:toc}
+1. TOC
+{:toc}
 
 ## Introduction
 

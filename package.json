@@ -1,6 +1,6 @@
 {
   "name": "redyn",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Redis-like implementation stored in DynamoDB",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,20 @@
   "homepage": "https://github.com/someimportantcompany/redyn#readme",
   "author": "James D <james@jdrydn.com> (https://jdrydn.com)",
   "license": "MIT",
-  "keywords": [ "dynamodb", "dynamo", "aws", "amazon", "redis", "key-value" ],
-  "files": [ "*.js", "!*.test.js", "commands/*.js", "!commands/*.test.js" ],
+  "keywords": [
+    "dynamodb",
+    "dynamo",
+    "aws",
+    "amazon",
+    "redis",
+    "key-value"
+  ],
+  "files": [
+    "*.js",
+    "!*.test.js",
+    "commands/*.js",
+    "!commands/*.test.js"
+  ],
   "dependencies": {
     "aws-sdk": "^2.824.0",
     "lodash.isplainobject": "^4.0.6"

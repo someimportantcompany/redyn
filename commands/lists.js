@@ -1,4 +1,4 @@
-const { assert, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
+const { assert, isPlainObject, marshall, unmarshall } = require('../utils');
 
 const transactables = {
 
@@ -10,7 +10,7 @@ const transactables = {
     assert(Array.isArray(elements), new TypeError('Expected elements to be an array'));
     assert(elements.length <= 25, new TypeError('Expected elements to be less-than-or-equal-to 25 items'));
 
-    await handler({
+    const result = await handler({
       Update: {
         TableName: tableName,
         Key: marshall({ key }),
@@ -18,10 +18,16 @@ const transactables = {
         UpdateExpression: 'SET #value = list_append(if_not_exists(#value, :start), :append)',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
         ExpressionAttributeValues: marshall({ ':start': [], ':type': 'L', ':append': elements }),
+        ReturnValues: 'UPDATED_NEW',
       },
     });
 
-    return true;
+    if (handler.isTransaction) {
+      return true;
+    } else {
+      const { value } = result && isPlainObject(result.Attributes) ? unmarshall(result.Attributes) : {};
+      return Array.isArray(value) ? value.length : 0;
+    }
   },
 
   async lpush(handler, key, ...elements) {
@@ -34,7 +40,7 @@ const transactables = {
 
     elements = elements.reverse();
 
-    await handler({
+    const result = await handler({
       Update: {
         TableName: tableName,
         Key: marshall({ key }),
@@ -42,10 +48,16 @@ const transactables = {
         UpdateExpression: 'SET #value = list_append(:prepend, if_not_exists(#value, :start))',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
         ExpressionAttributeValues: marshall({ ':start': [], ':type': 'L', ':prepend': elements }),
+        ReturnValues: 'UPDATED_NEW',
       },
     });
 
-    return true;
+    if (handler.isTransaction) {
+      return true;
+    } else {
+      const { value } = result && isPlainObject(result.Attributes) ? unmarshall(result.Attributes) : {};
+      return Array.isArray(value) ? value.length : 0;
+    }
   },
 
   async rpushx(handler, key, ...elements) {
@@ -57,7 +69,7 @@ const transactables = {
     assert(elements.length <= 25, new TypeError('Expected elements to be less-than-or-equal-to 25 items'));
 
     try {
-      await handler({
+      const result = await handler({
         Update: {
           TableName: tableName,
           Key: marshall({ key }),
@@ -65,15 +77,23 @@ const transactables = {
           UpdateExpression: 'SET #value = list_append(if_not_exists(#value, :start), :append)',
           ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
           ExpressionAttributeValues: marshall({ ':start': [], ':type': 'L', ':append': elements }),
+          ReturnValues: 'UPDATED_NEW',
         },
       });
+
+      if (handler.isTransaction) {
+        return true;
+      } else {
+        const { value } = result && isPlainObject(result.Attributes) ? unmarshall(result.Attributes) : {};
+        return Array.isArray(value) ? value.length : 0;
+      }
     } catch (err) {
-      if (err.name !== 'ConditionalCheckFailedException') {
+      if (err.name === 'ConditionalCheckFailedException') {
+        return false;
+      } else {
         throw err;
       }
     }
-
-    return true;
   },
 
   async lpushx(handler, key, ...elements) {
@@ -87,7 +107,7 @@ const transactables = {
     elements = elements.reverse();
 
     try {
-      await handler({
+      const result = await handler({
         Update: {
           TableName: tableName,
           Key: marshall({ key }),
@@ -95,15 +115,118 @@ const transactables = {
           UpdateExpression: 'SET #value = list_append(:prepend, if_not_exists(#value, :start))',
           ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
           ExpressionAttributeValues: marshall({ ':start': [], ':type': 'L', ':prepend': elements }),
+          ReturnValues: 'UPDATED_NEW',
         },
       });
+
+      if (handler.isTransaction) {
+        return true;
+      } else {
+        const { value } = result && isPlainObject(result.Attributes) ? unmarshall(result.Attributes) : {};
+        return Array.isArray(value) ? value.length : 0;
+      }
     } catch (err) {
-      if (err.name !== 'ConditionalCheckFailedException') {
+      if (err.name === 'ConditionalCheckFailedException') {
+        return false;
+      } else {
         throw err;
       }
     }
+  },
 
-    return true;
+  async lindex(handler, key, i, opts = undefined) {
+    const { tableName } = this;
+    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
+    assert(typeof handler === 'function', new TypeError('Expected handler to be a function'));
+    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
+    assert(typeof i === 'number', new TypeError('Expected i to be a number'));
+    assert(opts === undefined || isPlainObject(opts), new TypeError('Expected opts to be a plain object'));
+    opts = { ...opts };
+
+    assert([ 'boolean', 'undefined' ].includes(typeof opts.consistentRead),
+      new TypeError('Expected opts.consistentRead to be a boolean'));
+
+    const result = await handler({
+      Get: {
+        TableName: tableName,
+        Key: marshall({ key }),
+        ...(handler.isTransaction ? {} : {
+          ConsistentRead: opts.consistentRead,
+        }),
+      },
+    });
+
+    const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
+    assert(value === undefined || Array.isArray(value), new Error(`Expected ${key} to be a list`), {
+      code: 'WRONGTYPE'
+    });
+
+    return Array.isArray(value) && value.hasOwnProperty(i) ? value[i] : null;
+  },
+
+  async llen(handler, key, opts = undefined) {
+    const { tableName } = this;
+    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
+    assert(typeof handler === 'function', new TypeError('Expected handler to be a function'));
+    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
+    assert(opts === undefined || isPlainObject(opts), new TypeError('Expected opts to be a plain object'));
+    opts = { ...opts };
+
+    assert([ 'boolean', 'undefined' ].includes(typeof opts.consistentRead),
+      new TypeError('Expected opts.consistentRead to be a boolean'));
+
+    const result = await handler({
+      Get: {
+        TableName: tableName,
+        Key: marshall({ key }),
+        ...(handler.isTransaction ? {} : {
+          ConsistentRead: opts.consistentRead,
+        }),
+      },
+    });
+
+    const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
+    assert(value === undefined || Array.isArray(value), new Error(`Expected ${key} to be a list`), {
+      code: 'WRONGTYPE'
+    });
+
+    return Array.isArray(value) ? value.length : null;
+  },
+
+  async lrange(handler, key, start, end, opts = undefined) {
+    const { tableName } = this;
+    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
+    assert(typeof handler === 'function', new TypeError('Expected handler to be a function'));
+    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
+    assert(typeof start === 'number', new TypeError('Expected start to be a number'));
+    assert(typeof end === 'number', new TypeError('Expected end to be a number'));
+    assert(opts === undefined || isPlainObject(opts), new TypeError('Expected opts to be a plain object'));
+    opts = { ...opts };
+
+    assert([ 'boolean', 'undefined' ].includes(typeof opts.consistentRead),
+      new TypeError('Expected opts.consistentRead to be a boolean'));
+
+    const result = await handler({
+      Get: {
+        TableName: tableName,
+        Key: marshall({ key }),
+        ...(handler.isTransaction ? {} : {
+          ConsistentRead: opts.consistentRead,
+        }),
+      },
+    });
+
+    const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
+    assert(value === undefined || Array.isArray(value), new Error(`Expected ${key} to be a list`), {
+      code: 'WRONGTYPE'
+    });
+
+    if (Array.isArray(value) && value.length && end < 0) {
+      end = value.length - end;
+    }
+
+    // LRANGE list 0 10 will return 11 elements, that is, the rightmost item is included
+    return Array.isArray(value) ? value.slice(start, end + 1) : [];
   },
 
   async lset(handler, key, i, value) {
@@ -130,79 +253,4 @@ const transactables = {
 
 };
 
-const methods = {
-
-  async lrange(key, start, stop) {
-    const { client, tableName } = this;
-    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
-    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
-    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
-    assert(typeof start === 'number', new TypeError('Expected start to be a number'));
-    assert(typeof stop === 'number', new TypeError('Expected stop to be a number'));
-
-    const params = {
-      TableName: tableName,
-      Key: marshall({ key }),
-      ConsistentRead: true,
-    };
-
-    const result = await client.getItem(params).promise();
-    const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
-    assert(value === undefined || Array.isArray(value), new Error(`Expected ${key} to be a list`), {
-      code: 'WRONGTYPE'
-    });
-
-    if (Array.isArray(value) && value.length && stop < 0) {
-      stop = value.length - stop;
-    }
-
-    // LRANGE list 0 10 will return 11 elements, that is, the rightmost item is included
-    return Array.isArray(value) ? value.slice(start, stop + 1) : [];
-  },
-
-  async lindex(key, i) {
-    const { client, tableName } = this;
-    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
-    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
-    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
-    assert(typeof i === 'number', new TypeError('Expected index to be a number'));
-
-    const params = {
-      TableName: tableName,
-      Key: marshall({ key }),
-      ConsistentRead: true,
-    };
-
-    const result = await client.getItem(params).promise();
-    const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
-    assert(value === undefined || Array.isArray(value), new Error(`Expected ${key} to be a list`), {
-      code: 'WRONGTYPE'
-    });
-
-    return Array.isArray(value) ? (value[i] || null) : null;
-  },
-
-  async llen(key) {
-    const { client, tableName } = this;
-    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
-    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
-    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
-
-    const params = {
-      TableName: tableName,
-      Key: marshall({ key }),
-      ConsistentRead: true,
-    };
-
-    const result = await client.getItem(params).promise();
-    const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
-    assert(value === undefined || Array.isArray(value), new Error(`Expected ${key} to be a list`), {
-      code: 'WRONGTYPE'
-    });
-
-    return Array.isArray(value) ? value.length : null;
-  },
-
-};
-
-module.exports = { methods, transactables };
+module.exports = { transactables };

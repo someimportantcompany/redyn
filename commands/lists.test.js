@@ -16,10 +16,10 @@ describe('commands', () => describe('lists', () => {
     const key = uuid();
 
     const rpushOk1 = await client.rpush(key, 'value');
-    assert(rpushOk1 === true, 'Expected RPUSH to return true');
+    assert.strictEqual(rpushOk1, 1, 'Expected RPUSH to return length 1');
 
     const rpushOk2 = await client.rpush(key, 'value2', 'value3');
-    assert(rpushOk2 === true, 'Expected RPUSH to return true');
+    assert.strictEqual(rpushOk2, 3, 'Expected RPUSH to return length 3');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -31,10 +31,10 @@ describe('commands', () => describe('lists', () => {
     const key = uuid();
 
     const lpushOk1 = await client.lpush(key, 'value');
-    assert(lpushOk1 === true, 'Expected LPUSH to return true');
+    assert.strictEqual(lpushOk1, 1, 'Expected LPUSH to return length 1');
 
     const lpushOk2 = await client.lpush(key, 'value2', 'value3');
-    assert(lpushOk2 === true, 'Expected LPUSH to return true');
+    assert.strictEqual(lpushOk2, 3, 'Expected LPUSH to return length 3');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -46,10 +46,10 @@ describe('commands', () => describe('lists', () => {
     const key = uuid();
 
     const rpushOk = await client.rpush(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    assert.strictEqual(rpushOk, 1, 'Expected RPUSH to return length 1');
 
     const rpushxOk = await client.rpushx(key, 'value2');
-    assert(rpushxOk === true, 'Expected RPUSHX to return true');
+    assert.strictEqual(rpushxOk, 2, 'Expected RPUSHX to return length 2');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -61,10 +61,10 @@ describe('commands', () => describe('lists', () => {
     const key = uuid();
 
     const rpushOk = await client.rpush(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    assert.strictEqual(rpushOk, 1, 'Expected RPUSH to return length 1');
 
     const lpushxOk = await client.lpushx(key, 'value2');
-    assert(lpushxOk === true, 'Expected LPUSHX to return true');
+    assert.strictEqual(lpushxOk, 2, 'Expected LPUSHX to return length 2');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -76,7 +76,7 @@ describe('commands', () => describe('lists', () => {
     const key = uuid();
 
     const rpushOk = await client.rpushx(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    assert(rpushOk === false, 'Expected RPUSHX to return false when the list does not exist');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, null);
   });
@@ -84,8 +84,8 @@ describe('commands', () => describe('lists', () => {
   it('should fail to lpushx a list silently', async () => {
     const key = uuid();
 
-    const rpushOk = await client.lpushx(key, 'value');
-    assert(rpushOk === true, 'Expected RPUSH to return true');
+    const lpushOk = await client.lpushx(key, 'value');
+    assert(lpushOk === false, 'Expected LPUSHX to return false when the list does not exist');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, null);
   });

@@ -1,0 +1,46 @@
+---
+title: Home
+nav_order: 1
+---
+
+[Promise](https://onezero.medium.com/mewe-sold-itself-on-privacy-then-the-radical-right-arrived-e527b38e4718)-first [Redis](https://redis.io)-implementation for [NodeJS](https://nodejs.org) backed by [DynamoDB](https://aws.amazon.com/dynamodb).
+{: .fs-6 .fw-300 }
+
+[![NPM](https://badge.fury.io/js/redyn.svg)](https://npm.im/redyn)
+[![CI](https://github.com/someimportantcompany/redyn/workflows/Test/badge.svg?branch=master)](https://github.com/someimportantcompany/redyn/actions?query=branch%3Amaster)
+[![Docs](https://img.shields.io/static/v1?label=Read&message=Documentation&color=blue&logo=read-the-docs)](./docs/)
+
+This library is designed to use DynamoDB as a simple cache store - using a combination of DynamoDB patterns & expressions to store data in a similar pattern to Redis.
+
+```js
+const redyn = require('redyn');
+// Specify your DynamoDB table
+const client = redyn.createClient('redyn-example-table');
+
+// Start executing Redis commands!
+await client.set('users:1', JSON.stringify({ id: 1, name: 'Barry Allen' }));
+await client.set('users:2', JSON.stringify({ id: 2, name: 'Iris West' }));
+await client.set('users:3', JSON.stringify({ id: 3, name: 'Cisco Ramon' }));
+await client.set('users:4', JSON.stringify({ id: 4, name: 'Caitlin Snow' }));
+await client.set('users:5', JSON.stringify({ id: 5, name: 'Harrison Wells' }));
+
+const user = await client.get('users:1');
+console.log(JSON.parse(user));
+// { id: 1,
+//   name: 'Barry Allen' }
+
+
+await client.rpush('users', 1, 2, 3, 3, 4, 4, 5);
+await client.lpush('users', 0);
+
+const userIDs = await client.lrange('users', 0, -1);
+console.log(JSON.parse(userIDs));
+// [ 0, 1, 2, 3, 3, 4, 4, 5 ]
+
+
+await client.sadd('users:unique', 1, 2, 3, 3, 4, 4, 5);
+
+const uniqueUserIDs = await client.smembers('users:unique');
+console.log(JSON.parse(uniqueUserIDs));
+// [ 1, 2, 3, 4, 5 ]
+```

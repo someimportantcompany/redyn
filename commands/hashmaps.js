@@ -133,6 +133,32 @@ const transactables = {
     return isPlainObject(value) ? fields.map(field => value[field] || null) : fields.map(() => null);
   },
 
+  async hset(handler, key, ...items) {
+    const { tableName } = this;
+    assert(typeof handler === 'function', new TypeError('Expected handler to be a function'));
+    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
+    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
+    assert(Array.isArray(items) && items.length, new TypeError('Expected an array of items'));
+
+    items = formatKeyValueObject(items);
+    assert(items.length <= 25, new TypeError('Expected keys to be less-than-or-equal-to 25 keys'));
+
+    await handler({
+      Update: {
+        TableName: tableName,
+        Key: marshall({ key }),
+        ConditionExpression: 'attribute_not_exists(#key)',
+        UpdateExpression: 'SET #value = :values',
+        ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
+        ExpressionAttributeValues: marshall({
+          ':values': items.reduce((r, { key: k, value: v }) => ({ ...r, [k]: v }), {}),
+        }),
+      },
+    });
+
+    return true;
+  },
+
   async hstrlen(handler, key, field) {
     const { tableName } = this;
     assert(typeof handler === 'function', new TypeError('Expected handler to be a function'));

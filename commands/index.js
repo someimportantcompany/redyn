@@ -1,4 +1,4 @@
-const hashes = require('./hashes');
+const hashmaps = require('./hashmaps');
 const lists = require('./lists');
 const sets = require('./sets');
 const strings = require('./strings');
@@ -7,13 +7,13 @@ module.exports = {
   methods: {
     ...strings.methods,
     ...lists.methods,
-    ...hashes.methods,
+    ...hashmaps.methods,
     ...sets.methods,
   },
   transactables: {
     ...strings.transactables,
     ...lists.transactables,
-    ...hashes.transactables,
+    ...hashmaps.transactables,
     ...sets.transactables,
   },
 };

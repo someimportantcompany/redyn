@@ -88,11 +88,8 @@ const transactables = {
         return Array.isArray(value) ? value.length : 0;
       }
     } catch (err) {
-      if (err.name === 'ConditionalCheckFailedException') {
-        return false;
-      } else {
-        throw err;
-      }
+      assert(err.code === 'ConditionalCheckFailedException', err);
+      return false;
     }
   },
 
@@ -126,11 +123,8 @@ const transactables = {
         return Array.isArray(value) ? value.length : 0;
       }
     } catch (err) {
-      if (err.name === 'ConditionalCheckFailedException') {
-        return false;
-      } else {
-        throw err;
-      }
+      assert(err.code === 'ConditionalCheckFailedException', err);
+      return false;
     }
   },
 

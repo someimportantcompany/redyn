@@ -66,11 +66,19 @@ describe('commands', () => describe('strings', () => {
     });
   });
 
+  it('should strlen strings', async () => {
+    const setOk = await client.set('example-string', 'example-value');
+    assert(setOk === true, 'Expected SET to return true');
+
+    const length = await client.strlen('example-string');
+    assert(length === 13, 'Expected STRLEN to return 13');
+  });
+
   it('should incr numbers', async () => {
     const key = uuid();
 
     const result = await client.incr(key);
-    assert(result === true, 'Expected INCR to return true');
+    assert.strictEqual(result, 1, 'Expected INCR to return 1');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -82,7 +90,7 @@ describe('commands', () => describe('strings', () => {
     const key = uuid();
 
     const result = await client.incrby(key, 5);
-    assert(result === true, 'Expected INCRBY to return true');
+    assert.strictEqual(result, 5, 'Expected INCRBY to return 5');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -102,7 +110,7 @@ describe('commands', () => describe('strings', () => {
     });
 
     const result = await client.decr(key);
-    assert(result === true, 'Expected DECR to return true');
+    assert.strictEqual(result, 4, 'Expected DECR to return 4');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -122,7 +130,7 @@ describe('commands', () => describe('strings', () => {
     });
 
     const result = await client.decrby(key, 5);
-    assert(result === true, 'Expected DECRBY to return true');
+    assert.strictEqual(result, 5, 'Expected DECRBY to return 5');
 
     await assertItem(dynamodb, { TableName, Key: marshall({ key }) }, {
       key: { S: key },
@@ -234,14 +242,6 @@ describe('commands', () => describe('strings', () => {
       key: { S: key3 },
       value: { S: 'example-value3' },
     });
-  });
-
-  it('should strlen strings', async () => {
-    const setOk = await client.set('example-string', 'example-value');
-    assert(setOk === true, 'Expected SET to return true');
-
-    const length = await client.strlen('example-string');
-    assert(length === 13, 'Expected STRLEN to return 13');
   });
 
 }));

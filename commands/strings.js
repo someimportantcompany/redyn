@@ -17,12 +17,14 @@ const transactables = {
       Get: {
         TableName: tableName,
         Key: marshall({ key }),
-        ConsistentRead: opts.consistentRead,
+        ...(handler.isTransaction ? {} : {
+          ConsistentRead: opts.consistentRead,
+        }),
       },
     });
 
     const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
-    return value || null;
+    return [ 'string', 'number' ].includes(typeof value) ? value : null;
   },
 
   async set(handler, key, value, opts = undefined) {
@@ -56,6 +58,12 @@ const transactables = {
     return true;
   },
 
+  async strlen(handler, key, opts) {
+    const { get } = transactables;
+    const value = await get.call(this, handler, key, opts);
+    return value ? `${value}`.length : 0;
+  },
+
   async incrby(handler, key, incr) {
     const { tableName } = this;
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
@@ -63,7 +71,7 @@ const transactables = {
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
     assert(typeof incr === 'number', new TypeError('Expected incr to be a number'));
 
-    await handler({
+    const result = await handler({
       Update: {
         TableName: tableName,
         Key: marshall({ key }),
@@ -71,10 +79,16 @@ const transactables = {
         UpdateExpression: 'SET #value = if_not_exists(#value, :start) + :incr',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
         ExpressionAttributeValues: marshall({ ':start': 0, ':type': 'N', ':incr': incr }),
+        ReturnValues: 'UPDATED_NEW',
       },
     });
 
-    return true;
+    if (handler.isTransaction) {
+      return true;
+    } else {
+      const { value } = result && isPlainObject(result.Attributes) ? unmarshall(result.Attributes) : {};
+      return value || null;
+    }
   },
   async decrby(handler, key, decr) {
     const { tableName } = this;
@@ -83,7 +97,7 @@ const transactables = {
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
     assert(typeof decr === 'number', new TypeError('Expected decr to be a number'));
 
-    await handler({
+    const result = await handler({
       Update: {
         TableName: tableName,
         Key: marshall({ key }),
@@ -91,22 +105,54 @@ const transactables = {
         UpdateExpression: 'SET #value = if_not_exists(#value, :start) - :decr',
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value' },
         ExpressionAttributeValues: marshall({ ':start': 0, ':type': 'N', ':decr': decr }),
+        ReturnValues: 'UPDATED_NEW',
       },
     });
 
-    return true;
+    if (handler.isTransaction) {
+      return true;
+    } else {
+      const { value } = result && isPlainObject(result.Attributes) ? unmarshall(result.Attributes) : {};
+      return value || null;
+    }
   },
 
   incr(handler, key) {
-    return transactables.incrby.call(this, handler, key, 1);
+    const { incrby } = transactables;
+    return incrby.call(this, handler, key, 1);
   },
   decr(handler, key) {
-    return transactables.decrby.call(this, handler, key, 1);
+    const { decrby } = transactables;
+    return decrby.call(this, handler, key, 1);
   },
 
 };
 
 const methods = {
+
+  async getdel(key) {
+    const { client, tableName } = this;
+    assert(isDynamoDB(client), new TypeError('Expected client to be an instance of AWS.DynamoDB'));
+    assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
+    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
+
+    const params = {
+      TableName: tableName,
+      Key: marshall({ key }),
+    };
+
+    const result = await client.getItem(params).promise();
+
+    const { value } = result && result.Item ? result.Item : {};
+    const isStringValue = value && value.S && typeof value.S === 'string';
+    assert(!value || isStringValue, new Error(`Expected ${key} to hold a string value`));
+
+    if (isStringValue) {
+      await client.deleteItem(params).promise();
+    }
+
+    return isStringValue ? value.S : null;
+  },
 
   async mget(...items) {
     const { client, tableName } = this;
@@ -166,14 +212,6 @@ const methods = {
     }
 
     return true;
-  },
-
-  async strlen(key) {
-    assert(typeof this.get === 'function', new TypeError('Expected key to be a string'));
-    assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
-
-    const value = await this.get(key);
-    return typeof value === 'string' ? value.length : 0;
   },
 
 };

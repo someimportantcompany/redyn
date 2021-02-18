@@ -11,9 +11,9 @@ back_to_top: true
 back_to_top_text: "Back to top"
 
 footer_content: >
-  Copyright © {{ 'now' | date: "%Y" }}.
-  Distributed by an [MIT license]({{site.gh_edit_repository}}/blob/master/LICENSE).
-  Redyn has no affiliation with [Redis](https://redis.io/documentation/#credits).
+  Copyright © 2021.
+  <a href="https://github.com/someimportantcompany/redyn/blob/master/LICENSE" target="_blank">MIT License</a>.
+  Redyn has no affiliation with <a href="https://redis.io/documentation/#credits" target="_blank">Redis</a>.
 
 gh_edit_link: true
 gh_edit_link_text: Edit this page on GitHub

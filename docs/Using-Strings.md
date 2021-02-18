@@ -254,3 +254,7 @@ const result = await client.mset({
 });
 console.log(result); // true
 ```
+
+---
+
+[Check out the Strings source on GitHub]({{site.gh_edit_repository}}/blob/master/commands/strings.js)

@@ -1,2 +1,15 @@
 remote_theme: pmarsceill/just-the-docs
 search_enabled: false
+aux_links:
+  Redyn on GitHub:
+    - https://github.com/someimportantcompany/redyn
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+gh_edit_link: true
+gh_edit_link_text: Edit this page on GitHub
+gh_edit_repository: https://github.com/someimportantcompany/redyn
+gh_edit_branch: master
+gh_edit_source: docs
+gh_edit_view_mode: edit

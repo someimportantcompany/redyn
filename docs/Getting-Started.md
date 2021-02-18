@@ -34,14 +34,31 @@ import redyn from 'redyn';
 
 ## Create a client
 
-The `createClient` method is the starting point for all clients: It is a synchronous method that builds a client from the provided configuration object that defines which table will be used:
+The `createClient` method is your starting point: It is a synchronous method that builds a client from the provided configuration object that defines which table will be used:
 
 ```js
 const redyn = require('redyn');
 const client = redyn.createClient('redyn-example-cache');
 ```
 
-You must ensure your table has already been created following this [`createTable`](./createTable.json) specification.
+You must ensure your table has already been created following this [`createTable`](https://github.com/someimportantcompany/redyn/blob/master/createTable.json) specification:
+
+```json
+{
+  "TableName": "redyn-example-table",
+  "BillingMode": "PAY_PER_REQUEST",
+  "KeySchema": [
+    { "AttributeName": "key", "KeyType": "HASH" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "key", "AttributeType": "S" }
+  ],
+  "TimeToLiveSpecification": {
+    "AttributeName": "ttl",
+    "Enabled": true
+  }
+}
+```
 
 ## Set DynamoDB
 

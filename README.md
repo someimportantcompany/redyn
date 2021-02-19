@@ -1,7 +1,6 @@
-# redyn
-
 [![NPM](https://badge.fury.io/js/redyn.svg)](https://npm.im/redyn)
 [![CI](https://github.com/someimportantcompany/redyn/workflows/Test/badge.svg?branch=master)](https://github.com/someimportantcompany/redyn/actions?query=branch%3Amaster)
+<!-- [![Coverage](https://coveralls.io/repos/github/someimportantcompany/redyn/badge.svg?branch=master)](https://coveralls.io/github/someimportantcompany/redyn?branch=master) -->
 
 Promise-first [Redis](https://redis.io)-implementation for [NodeJS](https://nodejs.org) backed by [DynamoDB](https://aws.amazon.com/dynamodb).
 

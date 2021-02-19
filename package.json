@@ -1,6 +1,6 @@
 {
   "name": "redyn",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Promise-first Redis-implementation for NodeJS backed by DynamoDB",
   "main": "index.js",
   "scripts": {

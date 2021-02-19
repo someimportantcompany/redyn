@@ -236,4 +236,4 @@ console.log(count); // 2
 
 ---
 
-[Check out the Lists source on GitHub]({{site.gh_edit_repository}}/blob/master/commands/lists.js)
+[Check out the Sets source on GitHub]({{site.gh_edit_repository}}/blob/master/commands/sets.js)

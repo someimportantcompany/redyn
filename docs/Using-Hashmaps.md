@@ -4,6 +4,10 @@ nav_order: 5
 ---
 
 # Using Hashmaps
+{: .no_toc }
+
+1. TOC
+{:toc}
 
 ## `client.hget(key, field)`
 

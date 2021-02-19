@@ -6,6 +6,9 @@ nav_order: 7
 # Transactions
 
 ```js
+const redyn = require('redyn');
+const client = redyn.createClient('redyn-example-table');
+
 await redyn.transaction([
   client.transaction.set('users:1', JSON.stringify({ id: 1, name: 'Barry Allen' })),
   client.transaction.set('users:2', JSON.stringify({ id: 2, name: 'Iris West' })),

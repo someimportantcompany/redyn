@@ -1,6 +1,6 @@
 {
   "name": "redyn",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Promise-first Redis-implementation for NodeJS backed by DynamoDB",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,20 @@
   "homepage": "https://someimportantcompany.com/redyn",
   "author": "James D <james@jdrydn.com> (https://jdrydn.com)",
   "license": "MIT",
-  "keywords": [ "amazon", "aws", "dynamodb", "dynamo", "redis", "key-value" ],
-  "files": [ "*.js", "!*.test.js", "commands/*.js", "!commands/*.test.js" ],
+  "keywords": [
+    "amazon",
+    "aws",
+    "dynamodb",
+    "dynamo",
+    "redis",
+    "key-value"
+  ],
+  "files": [
+    "*.js",
+    "!*.test.js",
+    "commands/*.js",
+    "!commands/*.test.js"
+  ],
   "dependencies": {
     "aws-sdk": "^2.824.0",
     "lodash.isplainobject": "^4.0.6"

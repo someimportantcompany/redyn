@@ -14,6 +14,9 @@
   "homepage": "https://someimportantcompany.com/redyn",
   "author": "James D <james@jdrydn.com> (https://jdrydn.com)",
   "license": "MIT",
+  "_moduleAliases": {
+    "redyn": "./"
+  },
   "keywords": [
     "amazon",
     "aws",

@@ -1,19 +1,13 @@
-require('dotenv/config');
-require('module-alias/register');
+/* eslint-disable global-require */
+const dotenv = require('dotenv');
+const path = require('path');
+dotenv.config({ path: path.resolve(__dirname, './.env') });
 
-(() => {
-  const moduleAlias = require('module-alias');
-  const path = require('path');
+const moduleAlias = require('module-alias');
+moduleAlias.addAliases({
+  '@test': __dirname,
+});
 
-  moduleAlias.addAliases({
-    redyn: path.resolve(__dirname, '../'),
-    '@test': path.resolve(__dirname),
-  });
-})();
-
-(() => {
-  const redyn = require('redyn');
-  const { dynamodb } = require('./utils');
-
-  redyn.setDynamoDB(dynamodb);
-})();
+const redyn = require('redyn');
+const { dynamodb } = require('./utils');
+redyn.setDynamoDB(dynamodb);

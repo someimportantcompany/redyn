@@ -1,6 +1,6 @@
 [![NPM](https://badge.fury.io/js/redyn.svg)](https://npm.im/redyn)
 [![CI](https://github.com/someimportantcompany/redyn/workflows/Test/badge.svg?branch=master)](https://github.com/someimportantcompany/redyn/actions?query=branch%3Amaster)
-<!-- [![Coverage](https://coveralls.io/repos/github/someimportantcompany/redyn/badge.svg?branch=master)](https://coveralls.io/github/someimportantcompany/redyn?branch=master) -->
+[![Coverage](https://coveralls.io/repos/github/someimportantcompany/redyn/badge.svg)](https://coveralls.io/github/someimportantcompany/redyn)
 
 Promise-first [Redis](https://redis.io)-implementation for [NodeJS](https://nodejs.org) backed by [DynamoDB](https://aws.amazon.com/dynamodb).
 
@@ -65,3 +65,7 @@ npm install --save redyn
   docker run --rm -d --name dynamodb -p 8000:8000 amazon/dynamodb-local
   ```
   - If you've not read through them, take note of [the differences](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.Differences) between the production AWS DynamoDB platform & local Docker container.
+
+---
+
+Any questions or suggestions please [open an issue](https://github.com/someimportantcompany/redyn/issues).

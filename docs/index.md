@@ -8,6 +8,7 @@ Promise-first [Redis](https://redis.io)-implementation for [NodeJS](https://node
 
 [![NPM](https://badge.fury.io/js/redyn.svg)](https://npm.im/redyn)
 [![CI](https://github.com/someimportantcompany/redyn/workflows/Test/badge.svg?branch=master)](https://github.com/someimportantcompany/redyn/actions?query=branch%3Amaster)
+[![Coverage](https://coveralls.io/repos/github/someimportantcompany/redyn/badge.svg)](https://coveralls.io/github/someimportantcompany/redyn)
 
 This library is designed to use DynamoDB as a simple cache store - using a combination of DynamoDB patterns & expressions to store data in a similar pattern to Redis.
 
@@ -43,3 +44,7 @@ const uniqueUserIDs = await client.smembers('users:unique');
 console.log(JSON.parse(uniqueUserIDs));
 // [ 1, 2, 3, 4, 5 ]
 ```
+
+---
+
+Any questions or suggestions please [open an issue](https://github.com/someimportantcompany/redyn/issues).

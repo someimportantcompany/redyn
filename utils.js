@@ -130,10 +130,12 @@ function marshall(input) {
     }
   };
 
-  for (const key in input) {
-    /* istanbul ignore else */
-    if (input.hasOwnProperty(key) && input[key] !== undefined) {
-      input[key] = transform(input[key]);
+  for (const [key, value] of Object.entries(input)) {
+    if (value === undefined) {
+      // Delete `undefined` values from the map
+      delete input[key];
+    } else {
+      input[key] = transform(value);
     }
   }
 
@@ -192,10 +194,12 @@ function unmarshall(input) {
     }
   };
 
-  for (const key in input) {
-    /* istanbul ignore else */
-    if (input.hasOwnProperty(key) && input[key] !== undefined) {
-      input[key] = transform(input[key]);
+  for (const [key, value] of Object.entries(input)) {
+    if (value === undefined) {
+      // Delete `undefined` values from the map
+      delete input[key];
+    } else {
+      input[key] = transform(value);
     }
   }
 

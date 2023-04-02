@@ -1,3 +1,8 @@
+const {
+  GetItemCommand, PutItemCommand,
+  TransactGetItemsCommand, TransactWriteItemsCommand,
+} = require('@aws-sdk/client-dynamodb');
+
 const { assert, isDynamoDB, isPlainObject, isSet, marshall, unmarshall } = require('../utils');
 /* eslint-disable no-invalid-this */
 
@@ -146,13 +151,12 @@ const methods = {
     assert(typeof tableName === 'string' && tableName.length, new TypeError('Expected tableName to be a string'));
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
 
-    const params = {
+    const result = await client.send(new GetItemCommand({
       TableName: tableName,
       Key: marshall({ key }),
       ConsistentRead: true,
-    };
+    }));
 
-    const result = await client.getItem(params).promise();
     const { value } = result && isPlainObject(result.Item) ? unmarshall(result.Item) : {};
     return [ ...value ];
   },
@@ -189,7 +193,7 @@ const methods = {
       },
     ];
 
-    await client.transactWriteItems({ TransactItems }).promise();
+    await client.send(new TransactWriteItemsCommand({ TransactItems }));
 
     return true;
   },
@@ -218,7 +222,7 @@ async function setfetch(keys) {
     },
   }));
 
-  const result = await client.transactGetItems({ TransactItems }).promise();
+  const result = await client.send(new TransactGetItemsCommand({ TransactItems }));
   assert(result && Array.isArray(result.Responses), new TypeError('Expected responses to be an array'));
 
   return result.Responses.map(({ Item }) => {
@@ -239,12 +243,13 @@ async function setstore(method, destination, ...keys) {
   const value = await method.call(this, ...keys);
   assert(Array.isArray(value), new Error('Expected result value to be an array'));
 
-  const params = {
+  await client.send(new PutItemCommand({
     TableName: tableName,
     Item: marshall({ key: destination, value: new Set(value) }),
-  };
-
-  await client.putItem(params).promise();
+    ReturnValues: 'NONE',
+    ReturnConsumedCapacity: 'NONE',
+    ReturnItemCollectionMetrics: 'NONE',
+  }));
 
   return value.length;
 }

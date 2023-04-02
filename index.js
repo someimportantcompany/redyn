@@ -1,6 +1,6 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 
-const { assert, createLogger, isDynamoDB, isPlainObject } = require('./utils');
+const { assert, createLogger, isPlainObject } = require('./utils');
 const { createStandaloneHandler, createTransactionHandler } = require('./handler');
 const { methods, transactables } = require('./commands');
 const { runTransaction } = require('./transactions');
@@ -48,11 +48,10 @@ function createClient(opts) {
 }
 
 function validateDynamoDB(client) {
-  if (isPlainObject(client)) {
+  if (client instanceof DynamoDBClient) {
+    return client
+  } else if (isPlainObject(client)) {
     return new DynamoDBClient({ ...client });
-  } else if (client) {
-    assert(isDynamoDB(client), new TypeError('Expected { dynamodb } to be an instance of DynamoDBClient'));
-    return client;
   } else {
     return null;
   }

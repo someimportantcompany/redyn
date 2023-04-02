@@ -37,7 +37,6 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.21.3",
-    "dotenv": "^6.2.0",
     "eslint": "^8.37.0",
     "eslint-plugin-mocha": "^10.1.0",
     "mocha": "^10.2.0",

@@ -14,27 +14,29 @@ function createStandaloneHandler(name, command) {
         assert(isPlainObject(body), new TypeError('Expected handler body to be an object'));
         assert(Object.keys(body).length === 1, new TypeError('Expected handler body to have one key'));
 
-        const { Get, Put, Update, Delete } = body;
+        const entries = Object.entries(body);
+        assert(entries.length === 1, new TypeError('Expected handler body to have one key'));
+        const [[key, params]] = entries;
+
         let result = null;
 
-        if (Get) {
-          // console.log(JSON.stringify({ getItem: Get }, null, 2));
-          result = await client.send(new GetItemCommand(Get));
-          // console.log(JSON.stringify({ getItem: result }, null, 2));
-        } else if (Put) {
-          // console.log(JSON.stringify({ putItem: Put }, null, 2));
-          result = await client.send(new PutItemCommand(Put));
-          // console.log(JSON.stringify({ putItem: result }, null, 2));
-        } else if (Update) {
-          // console.log(JSON.stringify({ updateItem: Update }, null, 2));
-          result = await client.send(new UpdateItemCommand(Update));
-          // console.log(JSON.stringify({ updateItem: result }, null, 2));
-        } else if (Delete) {
-          // console.log(JSON.stringify({ deleteItem: Delete }, null, 2));
-          result = await client.send(new DeleteItemCommand(Delete));
-          // console.log(JSON.stringify({ deleteItem: result }, null, 2));
+        if (key === 'Get') {
+          // console.log(JSON.stringify({ GetItemCommandInput: params }, null, 2));
+          result = await client.send(new GetItemCommand(params));
+          // console.log(JSON.stringify({ GetItemCommandOutput: result }, null, 2));
+        } else if (key === 'Put') {
+          // console.log(JSON.stringify({ PutItemCommandInput: params }, null, 2));
+          result = await client.send(new PutItemCommand(params));
+          // console.log(JSON.stringify({ PutItemCommandOutput: result }, null, 2));
+        } else if (key === 'Update') {
+          // console.log(JSON.stringify({ UpdateItemCommandInput: params }, null, 2));
+          result = await client.send(new UpdateItemCommand(params));
+          // console.log(JSON.stringify({ UpdateItemCommandOutput: result }, null, 2));
+        } else if (key === 'Delete') {
+          // console.log(JSON.stringify({ DeleteItemCommandInput: params }, null, 2));
+          result = await client.send(new DeleteItemCommand(params));
+          // console.log(JSON.stringify({ DeleteItemCommandOutput: result }, null, 2));
         } else {
-          const [ key ] = Object.keys(body);
           throw new TypeError(`Unknown key ${key} for non-transact handler`);
         }
 

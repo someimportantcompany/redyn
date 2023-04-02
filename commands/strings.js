@@ -1,3 +1,8 @@
+const {
+  GetItemCommand, DeleteItemCommand,
+  TransactGetItemsCommand, TransactWriteItemsCommand,
+} = require('@aws-sdk/client-dynamodb');
+
 const { assert, formatKeyValueObject, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
 const transactables = {
@@ -36,12 +41,12 @@ const transactables = {
     assert(opts === undefined || isPlainObject(opts), new TypeError('Expected opts to be a plain object'));
 
     opts = { ...opts };
+    assert(!(opts.ex && opts.exat), new Error('EX / EXAT are exclusive'));
+    assert(!(opts.nx && opts.xx), new Error('NX / XX are exclusive'));
     assert(!opts.ex || typeof opts.ex === 'number', new TypeError('Expected EX to be a number'));
     assert(!opts.exat || typeof opts.exat === 'number', new TypeError('Expected EXAT to be a number'));
     assert(opts.nx === undefined || typeof opts.nx === 'boolean', new TypeError('Expected NX to be a boolean'));
     assert(opts.xx === undefined || typeof opts.xx === 'boolean', new TypeError('Expected XX to be a boolean'));
-    assert(!(opts.ex && opts.exat), new Error('EX / EXAT are exclusive'));
-    assert(!(opts.nx && opts.xx), new Error('NX / XX are exclusive'));
 
     assert(!opts.px, new Error('Millisecond expiry is not supported by DynamoDB'));
     assert(!opts.pxat, new Error('Millisecond expiry is not supported by DynamoDB'));
@@ -52,6 +57,11 @@ const transactables = {
       Put: {
         TableName: tableName,
         Item: marshall({ key, value, ttl }),
+        ...(handler.isTransaction ? {} : {
+          ReturnValues: 'NONE',
+          ReturnConsumedCapacity: 'NONE',
+          ReturnItemCollectionMetrics: 'NONE',
+        }),
       },
     });
 
@@ -141,14 +151,14 @@ const methods = {
       Key: marshall({ key }),
     };
 
-    const result = await client.getItem(params).promise();
+    const result = await client.send(new GetItemCommand(params));
 
     const { value } = result && result.Item ? result.Item : {};
     const isStringValue = value && value.S && typeof value.S === 'string';
     assert(!value || isStringValue, new Error(`Expected ${key} to hold a string value`));
 
     if (isStringValue) {
-      await client.deleteItem(params).promise();
+      await client.send(new DeleteItemCommand(params));
     }
 
     return isStringValue ? value.S : null;
@@ -172,8 +182,7 @@ const methods = {
         };
       });
 
-      const results = await client.transactGetItems({ TransactItems }).promise();
-
+      const results = await client.send(new TransactGetItemsCommand({ TransactItems }));
       assert(results && Array.isArray(results.Responses), new Error('Expected transactGetItems response to be an array'));
       items = results.Responses.map(({ Item }) => {
         if (Item) {
@@ -208,7 +217,7 @@ const methods = {
         };
       });
 
-      await client.transactWriteItems({ TransactItems }).promise();
+      await client.send(new TransactWriteItemsCommand({ TransactItems }));
     }
 
     return true;

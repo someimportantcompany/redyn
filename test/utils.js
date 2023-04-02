@@ -1,7 +1,7 @@
 const assert = require('assert');
 const {
   DynamoDBClient,
-  PutItemCommand, CreateTableCommand, DeleteTableCommand, UpdateTimeToLiveCommand,
+  GetItemCommand, PutItemCommand, CreateTableCommand, DeleteTableCommand, UpdateTimeToLiveCommand,
 } = require('@aws-sdk/client-dynamodb');
 
 const exampleTable = require('../createTable.json');
@@ -14,7 +14,7 @@ async function assertItem(dynamodb, getItemOpts, expected) {
   getItemOpts.TableName = typeof getItemOpts.TableName === 'string' ? getItemOpts.TableName : 'redyn-example-table';
   getItemOpts.ConsistentRead = typeof getItemOpts.ConsistentRead === 'boolean' ? getItemOpts.ConsistentRead : true;
 
-  const result = await dynamodb.getItem(getItemOpts).promise();
+  const result = await dynamodb.send(new GetItemCommand(getItemOpts));
   const actual = isPlainObject(result.Item) ? result.Item : null;
   assert.deepStrictEqual(actual, expected, 'Expected item in DynamoDB to deepStrictEqual');
 }
@@ -66,13 +66,21 @@ async function writeItem(dynamodb, putItemOpts) {
 }
 
 module.exports = {
-  assertItem,
   dynamodb: new DynamoDBClient({
-    endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
-    region: process.env.AWS_REGION || 'us-east-1',
+    endpoint: 'http://localhost:8000',
+    customUserAgent: 'redyn-test-client',
+    region: 'us-east-1',
+    credentials: {
+      accessKeyId: 'some-important-access-key',
+      secretAccessKey: 'some-important-secret-key',
+    },
   }),
+
   deleteThenCreateExampleTable: d => deleteThenCreateTable(d, exampleTable),
   deleteThenCreateTable,
+
   marshall,
+
+  assertItem,
   writeItem,
 };

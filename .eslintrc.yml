@@ -2,12 +2,11 @@ env:
   es6: true
   node: true
 extends: 'eslint:recommended'
-parser: babel-eslint
+parser: '@babel/eslint-parser'
 parserOptions:
   sourceType: module
   ecmaVersion: 8
-plugins:
-  - sort-requires
+  requireConfigFile: false
 rules:
   accessor-pairs: error
   array-callback-return: error
@@ -232,7 +231,6 @@ rules:
   sort-imports: error
   sort-keys: off
   sort-vars: error
-  sort-requires/sort-requires: error
   space-before-blocks: error
   space-before-function-paren: off
   space-in-parens:

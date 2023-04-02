@@ -1,4 +1,5 @@
-const AWS = require('aws-sdk');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+
 const { assert, createLogger, isDynamoDB, isPlainObject } = require('./utils');
 const { createStandaloneHandler, createTransactionHandler } = require('./handler');
 const { methods, transactables } = require('./commands');
@@ -30,7 +31,7 @@ function createClient(opts) {
     }, {}),
   }, {
     tableName: { enumerable: true, value: tableName },
-    client: { value: validateDynamoDB(opts.dynamodb) || overwriteDynamoDB || new AWS.DynamoDB() },
+    client: { value: validateDynamoDB(opts.dynamodb) || overwriteDynamoDB || new DynamoDBClient({}) },
     log: { value: opts.log || createLogger(), },
     transaction: {
       get() {
@@ -48,11 +49,9 @@ function createClient(opts) {
 
 function validateDynamoDB(client) {
   if (isPlainObject(client)) {
-    return new AWS.DynamoDB({ ...client });
+    return new DynamoDBClient({ ...client });
   } else if (client) {
-    const { DynamoDB: { DocumentClient } } = AWS;
-    assert(!(client instanceof DocumentClient), new TypeError('AWS.DynamoDB.DocumentClient is not supported'));
-    assert(isDynamoDB(client), new TypeError('Expected { dynamodb } to be an instance of AWS.DynamoDB'));
+    assert(isDynamoDB(client), new TypeError('Expected { dynamodb } to be an instance of DynamoDBClient'));
     return client;
   } else {
     return null;
@@ -63,8 +62,8 @@ module.exports = {
   createClient,
 
   /**
-   * @param {(AWS.DynamoDB|Object)}
-   * @return {(AWS.DynamoDB|null)}
+   * @param {(DynamoDBClient|Object)}
+   * @return {(DynamoDBClient|null)}
    */
   setDynamoDB(client) {
     overwriteDynamoDB = validateDynamoDB(client);
@@ -74,7 +73,7 @@ module.exports = {
   /**
    * Run a transaction
    *
-   * @param {(AWS.DynamoDB|Object)} [client] Defaults to the global or a clean DynamoDB instance
+   * @param {(DynamoDBClient|Object)} [client] Defaults to the global or a clean DynamoDB instance
    * @param {RedynTransactionBlock[]} blocks The array
    * @param {(Object|undefined)} [opts]
    * @return {(Object|null)[]}
@@ -87,6 +86,6 @@ module.exports = {
       client = null;
     }
 
-    return runTransaction(validateDynamoDB(client) || overwriteDynamoDB || new AWS.DynamoDB(), blocks, opts);
+    return runTransaction(validateDynamoDB(client) || overwriteDynamoDB || new DynamoDBClient(), blocks, opts);
   },
 };

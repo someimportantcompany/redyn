@@ -1,6 +1,6 @@
-const AWS = require('aws-sdk');
-const isPlainObject = require('lodash.isplainobject');
 const ms = require('ms');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+
 const { name: packageName } = require('./package.json');
 
 const TEN_YEARS_MS = 60 * 60 * 24 * 7 * 52 * 10 * 1000;
@@ -77,7 +77,11 @@ function formatKeyValueObject(pairs) {
 }
 
 function isDynamoDB(value) {
-  return value && value instanceof AWS.DynamoDB;
+  return value && value instanceof DynamoDBClient;
+}
+
+function isPlainObject(input) {
+  return Object.prototype.toString.call(input) === '[object Object]';
 }
 
 function isSet(value) {

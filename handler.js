@@ -1,5 +1,4 @@
-const AWS = require('aws-sdk');
-const { assert, isPlainObject, packageName } = require('./utils');
+const { assert, isPlainObject, isDynamoDB, packageName } = require('./utils');
 const { RedynTransactionBlock } = require('./transactions');
 /* eslint-disable no-invalid-this */
 
@@ -7,7 +6,7 @@ function createStandaloneHandler(name, command) {
   return async function method(...args) {
     try {
       const { client } = this;
-      assert(client instanceof AWS.DynamoDB, 'Expected client to be an instance of AWS.DynamoDB');
+      assert(isDynamoDB(client), 'Expected client to be an instance of DynamoDB client');
 
       const handler = async body => {
         assert(isPlainObject(body), new TypeError('Expected handler body to be an object'));

@@ -1,3 +1,5 @@
+const { TransactGetItemsCommand, TransactWriteItemsCommand } = require('@aws-sdk/client-dynamodb');
+
 const { assert, isDynamoDB, isPlainObject } = require('./utils');
 
 class RedynTransactionBlock {
@@ -45,7 +47,7 @@ async function runTransaction(client, blocks, opts) {
   if (countGetTransacts > 0) {
     try {
       // Get items in a transaction
-      const res = await client.transactGetItems({ TransactItems: promises.map(({ req }) => req) }).promise();
+      const res = await client.send(new TransactGetItemsCommand({ TransactItems: promises.map(({ req }) => req) }));
       assert(res && Array.isArray(res.Responses), new TypeError('Expected transactGetItems results to be an array'));
       res.Responses.forEach((result, i) => promises[i].resolve(result));
     } catch (err) /* istanbul ignore next */ {
@@ -56,7 +58,7 @@ async function runTransaction(client, blocks, opts) {
   } else {
     try {
       // Write items in a transaction
-      await client.transactWriteItems({ TransactItems: promises.map(({ req }) => req) }).promise();
+      await client.send(new TransactWriteItemsCommand({ TransactItems: promises.map(({ req }) => req) }));
       promises.forEach(({ resolve }) => resolve());
     } catch (err) /* istanbul ignore next */ {
       // console.error(JSON.stringify({ transactWriteItems: TransactItems, err: { ...err } }, null, 2));

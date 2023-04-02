@@ -1,3 +1,5 @@
+const { GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand } = require('@aws-sdk/client-dynamodb');
+
 const { assert, isPlainObject, isDynamoDB, packageName } = require('./utils');
 const { RedynTransactionBlock } = require('./transactions');
 /* eslint-disable no-invalid-this */
@@ -17,23 +19,23 @@ function createStandaloneHandler(name, command) {
 
         if (Get) {
           // console.log(JSON.stringify({ getItem: Get }, null, 2));
-          result = await client.getItem(Get).promise();
+          result = await client.send(new GetItemCommand(Get));
           // console.log(JSON.stringify({ getItem: result }, null, 2));
         } else if (Put) {
           // console.log(JSON.stringify({ putItem: Put }, null, 2));
-          result = await client.putItem(Put).promise();
+          result = await client.send(new PutItemCommand(Put));
           // console.log(JSON.stringify({ putItem: result }, null, 2));
         } else if (Update) {
           // console.log(JSON.stringify({ updateItem: Update }, null, 2));
-          result = await client.updateItem(Update).promise();
+          result = await client.send(new UpdateItemCommand(Update));
           // console.log(JSON.stringify({ updateItem: result }, null, 2));
         } else if (Delete) {
           // console.log(JSON.stringify({ deleteItem: Delete }, null, 2));
-          result = await client.deleteItem(Delete).promise();
+          result = await client.send(new DeleteItemCommand(Delete));
           // console.log(JSON.stringify({ deleteItem: result }, null, 2));
         } else {
           const [ key ] = Object.keys(body);
-          assert(false, new TypeError(`Unknown key ${key} for non-transact handler`));
+          throw new TypeError(`Unknown key ${key} for non-transact handler`);
         }
 
         return result;

@@ -47,13 +47,13 @@ npm install --save redyn
 
 ## Documentation
 
-- [Getting Started](https://someimportantcompany.com/redyn/Getting-Started.html)
-- [Using Strings](https://someimportantcompany.com/redyn/Using-Strings.html)
-- [Using Lists](https://someimportantcompany.com/redyn/Using-Lists.html)
-- [Using Hashmaps](https://someimportantcompany.com/redyn/Using-Hashmaps.html)
-- [Using Sets](https://someimportantcompany.com/redyn/Using-Sets.html)
-- [Transactions](https://someimportantcompany.com/redyn/Transactions.html)
-- [Other Methods](https://someimportantcompany.com/redyn/Other-Methods.html)
+- [Getting Started](https://someimportantcompany.github.io/redyn/Getting-Started.html)
+- [Using Strings](https://someimportantcompany.github.io/redyn/Using-Strings.html)
+- [Using Lists](https://someimportantcompany.github.io/redyn/Using-Lists.html)
+- [Using Hashmaps](https://someimportantcompany.github.io/redyn/Using-Hashmaps.html)
+- [Using Sets](https://someimportantcompany.github.io/redyn/Using-Sets.html)
+- [Transactions](https://someimportantcompany.github.io/redyn/Transactions.html)
+- [Other Methods](https://someimportantcompany.github.io/redyn/Other-Methods.html)
 
 ## Development
 
@@ -69,3 +69,5 @@ npm install --save redyn
 ---
 
 Any questions or suggestions please [open an issue](https://github.com/someimportantcompany/redyn/issues).
+
+*Redyn has no affiliation with <a href="https://redis.io/documentation/#credits" target="_blank">Redis</a>.*

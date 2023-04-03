@@ -3,7 +3,9 @@
   "version": "0.0.6",
   "description": "Promise-first Redis-implementation for NodeJS backed by DynamoDB",
   "main": "index.js",
+  "types": "types.d.ts",
   "scripts": {
+    "docs:preview": "docker run --rm -it -v $PWD/docs:/srv/jekyll -v $PWD/docs/.jekyll-vendor/bundle:/usr/local/bundle -p 4000:4000 jekyll/jekyll:4.2.0 jekyll serve",
     "lint": "eslint --ext .js .",
     "test": "nyc mocha",
     "test:mocha": "mocha",

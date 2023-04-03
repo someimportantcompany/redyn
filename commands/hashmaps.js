@@ -1,3 +1,5 @@
+const { UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
+
 const { assert, formatKeyValueObject, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
 const transactables = {
@@ -223,20 +225,18 @@ const methods = {
         values: {},
       });
 
-      const params = {
+      await client.send(new UpdateItemCommand({
         TableName: tableName,
         Key: marshall({ key }),
         ConditionExpression: 'attribute_exists(#key) AND attribute_type(#value, :type)',
         UpdateExpression: `SET ${expression.join(', ')}`,
         ExpressionAttributeNames: { '#key': 'key', '#value': 'value', ...names },
         ExpressionAttributeValues: marshall({ ':type': 'M', ...values }),
-      };
-
-      await client.updateItem(params).promise();
+      }));
     } catch (err) {
-      assert(err.code === 'ConditionalCheckFailedException', err);
+      assert(err.name === 'ConditionalCheckFailedException', err);
 
-      const params = {
+      await client.send(new UpdateItemCommand({
         TableName: tableName,
         Key: marshall({ key }),
         ConditionExpression: 'attribute_not_exists(#key)',
@@ -245,9 +245,7 @@ const methods = {
         ExpressionAttributeValues: marshall({
           ':values': items.reduce((r, { key: k, value: v }) => ({ ...r, [k]: v }), {}),
         }),
-      };
-
-      await client.updateItem(params).promise();
+      }));
     }
 
     return true;

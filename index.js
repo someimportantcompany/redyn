@@ -49,7 +49,7 @@ function createClient(opts) {
 
 function validateDynamoDB(client) {
   if (client instanceof DynamoDBClient) {
-    return client
+    return client;
   } else if (isPlainObject(client)) {
     return new DynamoDBClient({ ...client });
   } else {

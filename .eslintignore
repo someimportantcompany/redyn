@@ -1,4 +1,5 @@
 .git/
 .nyc_output/
 coverage/
+docs/_site/
 node_modules/

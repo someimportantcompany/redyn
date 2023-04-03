@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Using Strings
 nav_order: 3
 ---

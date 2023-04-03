@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Other Methods
 nav_order: 8
 ---

@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Home
 nav_order: 1
 ---
@@ -14,10 +15,16 @@ This library is designed to use DynamoDB as a simple cache store - using a combi
 
 ```js
 const redyn = require('redyn');
+// Or
+import redyn from 'redyn';
+
 // Specify your DynamoDB table
 const client = redyn.createClient('redyn-example-table');
-
 // Start executing Redis commands!
+
+
+// Strings
+
 await client.set('users:1', JSON.stringify({ id: 1, name: 'Barry Allen' }));
 await client.set('users:2', JSON.stringify({ id: 2, name: 'Iris West' }));
 await client.set('users:3', JSON.stringify({ id: 3, name: 'Cisco Ramon' }));
@@ -30,6 +37,8 @@ console.log(JSON.parse(user));
 //   name: 'Barry Allen' }
 
 
+// Lists
+
 await client.rpush('users', 1, 2, 3, 3, 4, 4, 5);
 await client.lpush('users', 0);
 
@@ -37,6 +46,8 @@ const userIDs = await client.lrange('users', 0, -1);
 console.log(JSON.parse(userIDs));
 // [ 0, 1, 2, 3, 3, 4, 4, 5 ]
 
+
+// Sets
 
 await client.sadd('users:unique', 1, 2, 3, 3, 4, 4, 5);
 

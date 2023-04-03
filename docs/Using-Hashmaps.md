@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Using Hashmaps
 nav_order: 5
 ---

@@ -1,19 +1,24 @@
-remote_theme: pmarsceill/just-the-docs
+baseurl: /redyn
+permalink: pretty
+
+theme: just-the-docs
+
+repository: someimportantcompany/redyn
 search_enabled: false
 
 logo: /icon-site.png
 
 aux_links:
-  GitHub:
+  "GitHub":
     - https://github.com/someimportantcompany/redyn
-  Some Important Company:
+  "Some Important Company":
     - https://someimportantcompany.com
 
 back_to_top: true
 back_to_top_text: "Back to top"
 
 footer_content: >
-  Copyright © 2021 <a href="https://someimportantcompany.com/" target="_blank">Some Important Company</a>.
+  Copyright © 2021 <a href="https://github.com/someimportantcompany" target="_blank">Some Important Company</a>.
   <a href="https://github.com/someimportantcompany/redyn/blob/master/LICENSE" target="_blank">MIT License</a>.
   Redyn has no affiliation with <a href="https://redis.io/documentation/#credits" target="_blank">Redis</a>.
 

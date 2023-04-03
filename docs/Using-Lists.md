@@ -1,4 +1,5 @@
 ---
+layout: default
 title: Using Lists
 nav_order: 4
 ---

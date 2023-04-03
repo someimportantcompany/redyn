@@ -1,3 +1,8 @@
+const {
+  GetItemCommand, PutItemCommand, ScanCommand,
+  TransactGetItemsCommand, TransactWriteItemsCommand,
+} = require('@aws-sdk/client-dynamodb');
+
 const { assert, isDynamoDB, isPlainObject, marshall, unmarshall } = require('../utils');
 
 const transactables = {
@@ -223,11 +228,11 @@ const methods = {
     assert(opts.replace === undefined || typeof opts.replace === 'boolean',
       new TypeError('Expected opts.replace to be a boolean'));
 
-    const result = await client.getItem({
+    const result = await client.send(new GetItemCommand({
       TableName: tableName,
       Key: marshall({ key: source }),
       ConsistentRead: true,
-    });
+    }));
 
     if (result && result.Item && result.Item.value) {
       const params = {
@@ -240,7 +245,7 @@ const methods = {
         params.ExpressionAttributeNames = { '#key': 'key' };
       }
 
-      await client.putItem(params).promise();
+      await client.send(new PutItemCommand(params));
 
       return true;
     } else {
@@ -264,7 +269,7 @@ const methods = {
       },
     }));
     if (TransactItems.length) {
-      await client.transactWriteItems({ TransactItems }).promise();
+      await client.send(new TransactWriteItemsCommand({ TransactItems }));
     }
 
     return true;
@@ -289,7 +294,7 @@ const methods = {
     }));
 
     if (TransactItems.length) {
-      const res = await client.transactGetItems({ TransactItems }).promise();
+      const res = await client.send(new TransactGetItemsCommand({ TransactItems }));
       assert(res && Array.isArray(res.Responses), new TypeError('Expected transactGetItems results to be an array'));
       return res.Responses.reduce((r, { Item }) => r + (Item && Item.key ? 1 : 0), 0);
     } else {
@@ -312,7 +317,7 @@ const methods = {
     let hasMore = true;
 
     while (hasMore) {
-      const result = await client.scan({ ...params, ExclusiveStartKey: startKey }).promise();
+      const result = await client.send(new ScanCommand({ ...params, ExclusiveStartKey: startKey }));
       startKey = result ? result.LastEvaluatedKey : null;
       hasMore = Boolean(result && result.LastEvaluatedKey);
 
@@ -321,7 +326,7 @@ const methods = {
         Key,
       }));
       if (TransactItems.length) {
-        await client.transactWriteItems({ TransactItems }).promise();
+        await client.send(new TransactWriteItemsCommand({ TransactItems }));
       }
     }
 
@@ -336,11 +341,11 @@ const methods = {
     assert(typeof key === 'string' && key.length, new TypeError('Expected key to be a string'));
     assert(typeof db === 'string' && db.length, new TypeError('Expected db to be a string'));
 
-    const result = await client.getItem({
+    const result = await client.send(new GetItemCommand({
       TableName: tableName,
       Key: marshall({ key }),
       ConsistentRead: true,
-    });
+    }));
 
     if (result && result.Item && result.Item.value) {
       try {
@@ -361,7 +366,7 @@ const methods = {
           }
         ];
 
-        await client.transactWriteItems({ TransactItems }).promise();
+        await client.send(new TransactWriteItemsCommand({ TransactItems }));
         return true;
       } catch (err) {
         if (err.code !== 'ConditionalCheckFailedException') {

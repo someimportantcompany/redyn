@@ -1,8 +1,0 @@
-{
-  "exit": true,
-  "recursive": true,
-  "sort": true,
-  "require": [ "module-alias/register", "./test/bootstrap.js" ],
-  "ignore": [ "*node_modules*" ],
-  "spec": [ "./*.test.js", "./commands/*.test.js" ]
-}

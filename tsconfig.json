@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "target": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "paths": {
+      "@/src/*": ["./src/*"],
+      "@/test/*": ["./test/*"]
+    }
+  },
+  "exclude": [ "node_modules/" ],
+}
